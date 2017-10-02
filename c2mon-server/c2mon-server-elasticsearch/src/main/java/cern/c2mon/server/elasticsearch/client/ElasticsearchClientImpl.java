@@ -19,8 +19,11 @@ package cern.c2mon.server.elasticsearch.client;
 import cern.c2mon.server.elasticsearch.config.ElasticsearchProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.common.settings.Settings;
@@ -64,6 +67,11 @@ public class ElasticsearchClientImpl implements ElasticsearchClient {
   //static because we should only ever start 1 embedded node
   private static Node embeddedNode = null;
 
+  @Getter
+  private RestClient lowLevelRestClient;
+  @Getter
+  private RestHighLevelClient restClient;
+
   @Autowired
   public ElasticsearchClientImpl(ElasticsearchProperties properties) throws NodeValidationException {
     this.properties = properties;
@@ -74,6 +82,8 @@ public class ElasticsearchClientImpl implements ElasticsearchClient {
     }
 
     connectAsynchronously();
+
+    this.restClient = this.createRestClient();
   }
 
   /**
@@ -98,6 +108,17 @@ public class ElasticsearchClientImpl implements ElasticsearchClient {
 
     return client;
   }
+
+  private RestHighLevelClient createRestClient() {
+    this.lowLevelRestClient = RestClient.builder(
+        new HttpHost(properties.getHost(), properties.getHttpPort(), "http")
+    ).build();
+
+    RestHighLevelClient restHighLevelClient = new RestHighLevelClient(this.lowLevelRestClient);
+
+    return restHighLevelClient;
+  }
+
 
   /**
    * Connect to the cluster in a separate thread.
