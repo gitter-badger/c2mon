@@ -9,13 +9,10 @@ import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import cern.c2mon.server.elasticsearch.client.ElasticsearchClient;
 import cern.c2mon.server.elasticsearch.config.ElasticsearchProperties;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Wrapper around {@link BulkProcessor}. If a bulk operation fails, this class
@@ -45,8 +42,9 @@ public class BulkProcessorProxyImpl implements BulkProcessor.Listener, BulkProce
   }
 
   @Override
-  public void flush() {
+  public boolean flush() {
     bulkProcessor.flush();
+    return true;
   }
 
   @Override

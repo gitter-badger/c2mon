@@ -75,7 +75,7 @@ public class ElasticsearchServiceTest {
   public void setupElasticsearch() throws InterruptedException, NodeValidationException {
     try {
       CompletableFuture<Void> nodeReady = CompletableFuture.runAsync(() -> {
-        client.waitForYellowStatus();
+        //client.waitForYellowStatus();
         client.getClient().admin().indices().delete(new DeleteIndexRequest(elasticsearchProperties.getTagConfigIndex()));
         Indices.create(elasticsearchProperties.getTagConfigIndex(), "tag_config", MappingFactory.createTagConfigMapping());
         try {

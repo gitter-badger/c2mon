@@ -5,5 +5,5 @@ import org.elasticsearch.action.index.IndexRequest;
 public interface BulkProcessorProxy {
   void add(IndexRequest request);
 
-  void flush();
+  boolean flush();
 }
