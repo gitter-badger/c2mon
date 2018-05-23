@@ -16,10 +16,9 @@
  *****************************************************************************/
 package cern.c2mon.shared.common.datatag.address.impl;
 
-import org.simpleframework.xml.Element;
-
 import cern.c2mon.shared.common.ConfigurationException;
 import cern.c2mon.shared.common.datatag.address.PLCHardwareAddress;
+import org.simpleframework.xml.Element;
 
 
 /**
@@ -67,6 +66,13 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    */
   @Element(name = "bit-id")
   protected int bitId = 0;
+
+  /**
+   * Identifier of the string length
+   * the string length is an integer number >= 0 and <= 112
+   */
+  @Element(name = "string-length")
+  protected int stringLength = 0;
 
   /**
    * Human-readable physical minimum value.
@@ -159,6 +165,35 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
     setCommandPulseLength(pCmdPulseLength);
   }
 
+  /**
+   * @param pBlockType the type of data block within the PLC
+   * @param pWordId the identifier of the word within the data block
+   * @param pBitId the identifier of the bit within the word
+   * @param pResolutionFactor the resolution of the A/D converter
+   * @param pMinVal Human-readable physical minimum value.
+   * @param pMaxVal Human-readable physical maximum value.
+   * @param pNativeAddress the physical address of the tag, depending on PLC model used
+   * @param pCmdPulseLength the pulse length in milliseconds for boolean commands.
+   * @param stringLen length of the string
+   * @throws ConfigurationException In case the given configuration parameters are wrong
+   */
+  public PLCHardwareAddressImpl (
+          final int pBlockType, final int pWordId, final int pBitId, final int stringLen,
+          final int pResolutionFactor, final float pMinVal, final float pMaxVal, final String pNativeAddress,
+          final int pCmdPulseLength
+  ) throws ConfigurationException {
+    setBlockType(pBlockType);
+    setWordId(pWordId);
+    setBitId(pBitId);
+    setResolutionFactor(pResolutionFactor);
+    setPhysicalMinVal(pMinVal);
+    setPhysicalMaxVal(pMaxVal);
+    setNativeAddress(pNativeAddress);
+    setCommandPulseLength(pCmdPulseLength);
+    setStringLen(stringLen);
+  }
+
+
   // ---------------------------------------------------------------------------
   // Public member accessors
   // ---------------------------------------------------------------------------
@@ -244,18 +279,24 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
     return this.commandPulseLength;
   }
 
+  @Override
+  public int getStringLength() {
+    return stringLength;
+  }
+
   /**
    * Set the type of data structure in the PLC
    * The type can be STRUCT_BOOLEAN, STRUCT_ANALOG or STRUCT_COMMAND.
    */
   public final void setBlockType(final int pBlockType) throws ConfigurationException {
     if (!(pBlockType == STRUCT_BOOLEAN
-        || pBlockType == STRUCT_ANALOG
-        || pBlockType == STRUCT_BOOLEAN_COMMAND
-        || pBlockType == STRUCT_DIAG_BOOLEAN
-        || pBlockType == STRUCT_DIAG_ANALOG
-        || pBlockType == STRUCT_DIAG_BOOLEAN_COMMAND
-        || pBlockType == STRUCT_ANALOG_COMMAND)) {
+            || pBlockType == STRUCT_ANALOG
+            || pBlockType == STRUCT_BOOLEAN_COMMAND
+            || pBlockType == STRUCT_DIAG_BOOLEAN
+            || pBlockType == STRUCT_DIAG_ANALOG
+            || pBlockType == STRUCT_DIAG_BOOLEAN_COMMAND
+            || pBlockType == STRUCT_ANALOG_COMMAND
+            || pBlockType == STRUCT_STRING)) {
       throw new ConfigurationException(
           ConfigurationException.INVALID_PARAMETER_VALUE,
           "Invalid value for parameter \"block type\": " + pBlockType
@@ -357,4 +398,9 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
     this.commandPulseLength = pCmdPulseLength;
     return;
   }
+
+  public void setStringLen(int stringLen) {
+    this.stringLength = stringLen;
+  }
+
 }

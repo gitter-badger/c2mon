@@ -53,6 +53,11 @@ public interface PLCHardwareAddress  extends HardwareAddress {
    */
   int STRUCT_DIAG_BOOLEAN_COMMAND = 7;
 
+  /**
+   * Structure type for String data tags (inputs)
+   */
+  int STRUCT_STRING = 8;
+
   // ---------------------------------------------------------------------------
   // Public member accessors
   // ---------------------------------------------------------------------------
@@ -121,4 +126,5 @@ public interface PLCHardwareAddress  extends HardwareAddress {
    */
   int getCommandPulseLength();
 
+  int getStringLength();
 }
