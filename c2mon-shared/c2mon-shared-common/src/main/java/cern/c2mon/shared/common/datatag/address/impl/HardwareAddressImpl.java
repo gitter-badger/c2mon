@@ -16,24 +16,20 @@
  *****************************************************************************/
 package cern.c2mon.shared.common.datatag.address.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Map;
-
+import cern.c2mon.shared.common.ConfigurationException;
+import cern.c2mon.shared.common.datatag.address.HardwareAddress;
+import cern.c2mon.shared.common.datatag.address.HardwareAddressFactory;
+import cern.c2mon.shared.util.parser.SimpleXMLParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import cern.c2mon.shared.common.ConfigurationException;
-import cern.c2mon.shared.common.datatag.address.HardwareAddress;
-import cern.c2mon.shared.common.datatag.address.HardwareAddressFactory;
-import cern.c2mon.shared.util.parser.SimpleXMLParser;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 /**
  * Implementation of the HardwareAddress interface and of the abstract HardwareAddressFactory class.
@@ -317,8 +313,9 @@ public class HardwareAddressImpl extends HardwareAddressFactory implements Hardw
           }
         }
 
-        if (!result)
+        if (!result) {
           break;
+        }
       }
     }
 
@@ -339,7 +336,7 @@ public class HardwareAddressImpl extends HardwareAddressFactory implements Hardw
         try {
 
           // skip arrays
-          if (!field.getType().isArray() && field.get(this) != null)
+          if (!field.getType().isArray() && field.get(this) != null) {
             // for string take its length
             if (field.getType().equals(String.class)) {
               result ^= ((String) field.get(this)).length();
@@ -358,7 +355,7 @@ public class HardwareAddressImpl extends HardwareAddressFactory implements Hardw
             } else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
               result ^= field.getBoolean(this) == Boolean.TRUE ? 1 : 0;
             }
-
+          }
         } catch (Exception e) {
           log.error(e.toString());
           throw new RuntimeException("Exception caught while calculating HardwareAddress hashcode.", e);
