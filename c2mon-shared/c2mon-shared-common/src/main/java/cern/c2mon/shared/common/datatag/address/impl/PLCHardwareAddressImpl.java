@@ -17,8 +17,11 @@
 package cern.c2mon.shared.common.datatag.address.impl;
 
 import cern.c2mon.shared.common.ConfigurationException;
+import cern.c2mon.shared.common.datatag.address.HardwareAddressType;
 import cern.c2mon.shared.common.datatag.address.PLCHardwareAddress;
 import org.simpleframework.xml.Element;
+
+import static cern.c2mon.shared.common.datatag.address.HardwareAddressType.*;
 
 
 /**
@@ -45,10 +48,10 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * The block type can only be one of the constant values defined in
    * STRUCT_BOOLEAN, STRUCT_ANALOG, STRUCT_BOOLEAN_COMMAND and
    * STRUCT_ANALOG_COMMAND.
-   * @see PLCHardwareAddress#STRUCT_BOOLEAN
-   * @see PLCHardwareAddress#STRUCT_ANALOG
-   * @see PLCHardwareAddress#STRUCT_BOOLEAN_COMMAND
-   * @see PLCHardwareAddress#STRUCT_ANALOG_COMMAND
+   * @see HardwareAddressType#STRUCT_BOOLEAN
+   * @see HardwareAddressType#STRUCT_ANALOG
+   * @see HardwareAddressType#STRUCT_BOOLEAN_COMMAND
+   * @see HardwareAddressType#STRUCT_ANALOG_COMMAND
    */
   @Element(name = "block-type")
   protected int blockType = 0;
@@ -197,10 +200,10 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * STRUCT_BOOLEAN, STRUCT_ANALOG, STRUCT_BOOLEAN_COMMAND and
    * STRUCT_ANALOG_COMMAND.
    * @return the type of data block within the PLC
-   * @see PLCHardwareAddress#STRUCT_BOOLEAN
-   * @see PLCHardwareAddress#STRUCT_ANALOG
-   * @see PLCHardwareAddress#STRUCT_BOOLEAN_COMMAND
-   * @see PLCHardwareAddress#STRUCT_ANALOG_COMMAND
+   * @see HardwareAddressType#STRUCT_BOOLEAN
+   * @see HardwareAddressType#STRUCT_ANALOG
+   * @see HardwareAddressType#STRUCT_BOOLEAN_COMMAND
+   * @see HardwareAddressType#STRUCT_ANALOG_COMMAND
    */
   @Override
   public final int getBlockType() {
