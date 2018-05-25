@@ -182,14 +182,7 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
           final int pResolutionFactor, final float pMinVal, final float pMaxVal, final String pNativeAddress,
           final int pCmdPulseLength
   ) throws ConfigurationException {
-    setBlockType(pBlockType);
-    setWordId(pWordId);
-    setBitId(pBitId);
-    setResolutionFactor(pResolutionFactor);
-    setPhysicalMinVal(pMinVal);
-    setPhysicalMaxVal(pMaxVal);
-    setNativeAddress(pNativeAddress);
-    setCommandPulseLength(pCmdPulseLength);
+    this(pBlockType, pWordId, pBitId, pResolutionFactor, pMinVal, pMaxVal, pNativeAddress, pCmdPulseLength);
     setStringLen(stringLen);
   }
 

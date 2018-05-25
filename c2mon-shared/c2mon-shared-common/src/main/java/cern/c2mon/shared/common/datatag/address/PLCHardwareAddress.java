@@ -49,7 +49,7 @@ public interface PLCHardwareAddress  extends HardwareAddress {
   int STRUCT_DIAG_ANALOG = 6;
 
   /** Structure type for internal boolean commands for diagnostic purposes
-   * (e.g. PING) 
+   * (e.g. PING)
    */
   int STRUCT_DIAG_BOOLEAN_COMMAND = 7;
 
