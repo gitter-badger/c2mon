@@ -3,9 +3,7 @@ FROM ${IMAGE_BASE}
 
 ARG C2MON_SERVER_DIR=https://gitlab.cern.ch/c2mon/c2mon/raw/master/c2mon-server
 
-ENV MYSQL_RANDOM_ROOT_PASSWORD yes
 ENV MYSQL_DATABASE c2mon
-ENV MYSQL_POPULATE_DATABASE true
 
 ADD ${C2MON_SERVER_DIR}/c2mon-server-history/src/main/resources/sql/history-schema-mysql.sql /tmp
 ADD ${C2MON_SERVER_DIR}/c2mon-server-configuration/src/main/resources/sql/config-schema-mysql.sql /tmp

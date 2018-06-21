@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>cern.c2mon.server</groupId>
+    <artifactId>c2mon-server-parent</artifactId>
+    <version>1.8.39-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>docker-compose-parent</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>mysql</module>
+    <!--module>elasticsearch</module-->
+    <!--module>grafana</module-->
+    <!--module>c2mon-server</module-->
+  </modules>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+          <groupId>com.spotify</groupId>
+          <artifactId>dockerfile-maven-plugin</artifactId>
+          <version>${dockerfile-maven-version}</version>
+          <executions>
+            <execution>
+              <id>default</id>
+              <goals>
+                <goal>build</goal>
+                <goal>push</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <repository>gitlab-registry.cern.ch/c2mon/${project.artifactId}</repository>
+            <tag>${project.version}</tag>
+          </configuration>
+        </plugin>
+    </plugins>
+    
+    <extensions>
+        <extension>
+          <groupId>com.spotify</groupId>
+          <artifactId>dockerfile-maven-extension</artifactId>
+          <version>1.4.3</version>
+        </extension>
+  </extensions>
+  </build>
+  
+</project>

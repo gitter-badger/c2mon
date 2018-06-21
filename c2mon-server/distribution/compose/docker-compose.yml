@@ -1,0 +1,55 @@
+version: "3.0"
+services:
+   database:
+     build: mysql/
+     image: cernoss/c2mon-mysql
+     ports:
+       - "3306"
+     environment:
+       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+     networks:
+       - backend
+   activemq:
+     image: webcenter/activemq:5.14.3
+     ports:
+       - "61616"
+       - "61614"
+     networks:
+       - backend
+#   elasticsearch:
+#     image: elasticsearch:5.6-alpine
+#     environment:
+#       - cluster.name=c2mon
+#       - node.name=c2mon
+#       - bootstrap.memory_lock=true # Disable swapping
+#       - discovery.type=single-node
+#       - TAKE_FILE_OWNERSHIP=1 # Ensure correct permission settings for user for volume
+#       - ES_JAVA_OPTS=-Xms512m -Xmx512m
+#     ulimits:
+#      memlock:
+#        soft: -1  # Limit heap size
+#        hard: -1
+#     ports:
+#       - "9200"
+#       - "9300"
+#     networks:
+#       - backend
+   c2mon:
+     image: gitlab-registry.cern.ch/c2mon/c2mon:1.8.38
+     depends_on: 
+       - activemq
+       - database
+ #      - elasticsearch
+     environment:
+       - C2MON_SERVER_JMS_EMBEDDED=false
+       - C2MON_SERVER_JMS_URL=tcp://activemq:61616
+       - C2MON_SERVER_ELASTICSEARCH_EMBEDDED=false
+       - C2MON_SERVER_ELASTICSEARCH_HOST=cvl-bcast-server
+     volumes:
+       - "./c2mon-server/conf/c2mon-server.properties:/c2mon-server/conf/c2mon-server.properties"
+     networks:
+       - backend
+       - frontend
+networks:
+  backend:
+  frontend:

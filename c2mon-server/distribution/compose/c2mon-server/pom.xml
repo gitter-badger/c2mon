@@ -8,8 +8,8 @@
     <version>1.8.39-SNAPSHOT</version>
   </parent>
 
-  <artifactId>c2mon-mysql</artifactId>
-  <name>c2mon :: MySQL docker image</name>
+  <artifactId>c2mon-oss-server</artifactId>
+  <name>c2mon :: C2MON server docker image</name>
   <packaging>pom</packaging>
 
 
