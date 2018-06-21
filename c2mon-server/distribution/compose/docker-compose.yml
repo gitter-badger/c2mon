@@ -17,7 +17,7 @@ services:
      networks:
        - backend
    es:
-     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.9
+     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.10
      environment:
        - cluster.name=c2mon
        - discovery.type=single-node
