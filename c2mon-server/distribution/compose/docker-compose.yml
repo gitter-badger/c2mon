@@ -36,7 +36,7 @@ services:
        - backend
    c2mon:
      image: gitlab-registry.cern.ch/c2mon/c2mon:1.8.38
-     depends_on: 
+     depends_on:
        - db
        - mq
        - es
