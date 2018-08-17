@@ -17,6 +17,8 @@
 package cern.c2mon.shared.common.datatag.address;
 
 
+import cern.c2mon.shared.common.datatag.address.impl.PLCHardwareAddressType;
+
 /**
  * The PLCHardwareAddress interface is used by the JECMessageHandler.
  * 
@@ -32,10 +34,10 @@ public interface PLCHardwareAddress  extends HardwareAddress {
    * STRUCT_BOOLEAN, STRUCT_ANALOG, STRUCT_BOOLEAN_COMMAND and 
    * STRUCT_ANALOG_COMMAND.
    * @return the type of data block within the PLC
-   * @see HardwareAddressType#STRUCT_BOOLEAN
-   * @see HardwareAddressType#STRUCT_ANALOG
-   * @see HardwareAddressType#STRUCT_BOOLEAN_COMMAND
-   * @see HardwareAddressType#STRUCT_ANALOG_COMMAND
+   * @see PLCHardwareAddressType#STRUCT_BOOLEAN
+   * @see PLCHardwareAddressType#STRUCT_ANALOG
+   * @see PLCHardwareAddressType#STRUCT_BOOLEAN_COMMAND
+   * @see PLCHardwareAddressType#STRUCT_ANALOG_COMMAND
    */
   int getBlockType();
 

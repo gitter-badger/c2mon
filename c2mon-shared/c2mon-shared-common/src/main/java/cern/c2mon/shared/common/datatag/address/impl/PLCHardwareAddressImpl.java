@@ -17,14 +17,13 @@
 package cern.c2mon.shared.common.datatag.address.impl;
 
 import cern.c2mon.shared.common.ConfigurationException;
-import cern.c2mon.shared.common.datatag.address.HardwareAddressType;
 import cern.c2mon.shared.common.datatag.address.PLCHardwareAddress;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.simpleframework.xml.Element;
 
-import static cern.c2mon.shared.common.datatag.address.HardwareAddressType.*;
+import static cern.c2mon.shared.common.datatag.address.impl.PLCHardwareAddressType.*;
 
 
 /**
@@ -48,10 +47,10 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * The block type can only be one of the constant values defined in
    * STRUCT_BOOLEAN, STRUCT_ANALOG, STRUCT_BOOLEAN_COMMAND and
    * STRUCT_ANALOG_COMMAND.
-   * @see HardwareAddressType#STRUCT_BOOLEAN
-   * @see HardwareAddressType#STRUCT_ANALOG
-   * @see HardwareAddressType#STRUCT_BOOLEAN_COMMAND
-   * @see HardwareAddressType#STRUCT_ANALOG_COMMAND
+   * @see PLCHardwareAddressType#STRUCT_BOOLEAN
+   * @see PLCHardwareAddressType#STRUCT_ANALOG
+   * @see PLCHardwareAddressType#STRUCT_BOOLEAN_COMMAND
+   * @see PLCHardwareAddressType#STRUCT_ANALOG_COMMAND
    */
   @Getter
   @Element(name = "block-type")

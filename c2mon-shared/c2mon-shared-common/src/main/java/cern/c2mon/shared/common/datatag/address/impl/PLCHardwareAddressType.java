@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-package cern.c2mon.shared.common.datatag.address;
+package cern.c2mon.shared.common.datatag.address.impl;
 
 /**
  * Constants class containing structure types for data tags
  *
  * @author Szymon Halastra
  */
-public final class HardwareAddressType {
+public final class PLCHardwareAddressType {
     /**
      * Structure type for boolean data tags (inputs)
      */
@@ -65,6 +65,6 @@ public final class HardwareAddressType {
     /**
      * Private constructor for hiding possibility of creating the object of this class
      */
-    private HardwareAddressType() {
+    private PLCHardwareAddressType() {
     }
 }
