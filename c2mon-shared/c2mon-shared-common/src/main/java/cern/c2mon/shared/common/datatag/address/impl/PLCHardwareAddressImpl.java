@@ -19,6 +19,9 @@ package cern.c2mon.shared.common.datatag.address.impl;
 import cern.c2mon.shared.common.ConfigurationException;
 import cern.c2mon.shared.common.datatag.address.HardwareAddressType;
 import cern.c2mon.shared.common.datatag.address.PLCHardwareAddress;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.simpleframework.xml.Element;
 
 import static cern.c2mon.shared.common.datatag.address.HardwareAddressType.*;
@@ -40,9 +43,6 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
   /** Auto-generated serial versin UID */
   private static final long serialVersionUID = -4631934618859298750L;
 
-  // ---------------------------------------------------------------------------
-  // PROTECTED members
-  // ---------------------------------------------------------------------------
   /**
    * Type of data block within the PLC.
    * The block type can only be one of the constant values defined in
@@ -53,6 +53,7 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * @see HardwareAddressType#STRUCT_BOOLEAN_COMMAND
    * @see HardwareAddressType#STRUCT_ANALOG_COMMAND
    */
+  @Getter
   @Element(name = "block-type")
   protected int blockType = 0;
 
@@ -60,6 +61,7 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * Identifier of the word within the data block.
    * The word id is an integer number >=0
    */
+  @Getter
   @Element(name = "word-id")
   protected int wordId = 0;
 
@@ -67,6 +69,7 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * Identifier of the bit within the word.
    * The bit id is -1 for analog values, [0..15] for boolean values.
    */
+  @Getter
   @Element(name = "bit-id")
   protected int bitId = 0;
 
@@ -74,6 +77,8 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * Identifier of the string length
    * the string length is an integer number >= 0 and <= 112
    */
+  @Getter
+  @Setter
   @Element(name = "string-length")
   protected int stringLength = 0;
 
@@ -83,6 +88,8 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * convert hardware values sent by the PLC to engineering values.
    * @see #physicalMaxVal
    */
+  @Getter
+  @Setter
   @Element(name = "physical-min-val")
   protected float physicalMinVal = 0f;
 
@@ -92,30 +99,33 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
    * convert hardware values sent by the PLC to engineering values.
    * @see #physicalMinVal
    */
+  @Getter
+  @Setter
   @Element(name = "physical-max-val")
   protected float physicalMaxVal = 0f;
 
   /**
    * Resolution of the A/D converter.
    */
+  @Getter
+  @Setter
   @Element(name = "resolution-factor")
   protected int resolutionFactor = 0;
 
   /**
    * Physical address of the tag, depending on PLC model used.
    */
+  @Getter
+  @Setter
   @Element(name = "native-address", required = false)
   protected String nativeAddress = null;
 
   /**
    * Command pulse length in milliseconds for boolean commands.
    */
+  @Getter
   @Element(name = "command-pulse-length")
   protected int commandPulseLength;
-
-  // ----------------------------------------------------------------------------
-  // CONSTRUCTORS
-  // ----------------------------------------------------------------------------
 
   /**
    * Default Constructor needed for reflection call
@@ -186,98 +196,7 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
           final int pCmdPulseLength
   ) throws ConfigurationException {
     this(pBlockType, pWordId, pBitId, pResolutionFactor, pMinVal, pMaxVal, pNativeAddress, pCmdPulseLength);
-    setStringLen(stringLen);
-  }
-
-
-  // ---------------------------------------------------------------------------
-  // Public member accessors
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Get the type of data block within the PLC.
-   * The block type can only be one of the constant values defined in
-   * STRUCT_BOOLEAN, STRUCT_ANALOG, STRUCT_BOOLEAN_COMMAND and
-   * STRUCT_ANALOG_COMMAND.
-   * @return the type of data block within the PLC
-   * @see HardwareAddressType#STRUCT_BOOLEAN
-   * @see HardwareAddressType#STRUCT_ANALOG
-   * @see HardwareAddressType#STRUCT_BOOLEAN_COMMAND
-   * @see HardwareAddressType#STRUCT_ANALOG_COMMAND
-   */
-  @Override
-  public final int getBlockType() {
-    return this.blockType;
-  }
-
-  /**
-   * Get the identifier of the word within the data block.
-   * The word id is an integer number >=0
-   * @return the identifier of the word within the data block
-   */
-  @Override
-  public final int getWordId() {
-    return this.wordId;
-  }
-
-  /**
-   * Get the identifier of the bit within the word.
-   * The bit id is -1 for analog values, [0..15] for boolean values.
-   * @return the identifier of the bit within the word
-   */
-  @Override
-  public final int getBitId() {
-    return this.bitId;
-  }
-
-  /**
-   * Get the human-readable physical minimum value.
-   * This parameter, together with the physical maximum value, is needed to
-   * convert hardware values sent by the PLC to engineering values.
-   * @see #getPhysicalMaxVal()
-   */
-  @Override
-  public final float getPhysicalMinVal() {
-    return this.physicalMinVal;
-  }
-
-  /**
-   * Get the human-readable physical maximum value.
-   * This parameter, together with the physical minimum value, is needed to
-   * convert hardware values sent by the PLC to engineering values.
-   * @see #getPhysicalMinVal()
-   */
-  @Override
-  public final float getPhysicalMaxVal() {
-    return this.physicalMaxVal;
-  }
-
-  /**
-   * Get the physical address of the tag, depending on PLC model used.
-   * @return the physical address of the tag, depending on PLC model used
-   */
-  @Override
-  public final String getNativeAddress() {
-    return this.nativeAddress;
-  }
-
-  /**
-   * Get the resolution of the A/D converter.
-   * @return the resolution of the A/D converter
-   */
-  @Override
-  public final int getResolutionFactor() {
-    return this.resolutionFactor;
-  }
-
-  @Override
-  public int getCommandPulseLength() {
-    return this.commandPulseLength;
-  }
-
-  @Override
-  public int getStringLength() {
-    return stringLength;
+    setStringLength(stringLen);
   }
 
   /**
@@ -337,42 +256,6 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
   }
 
   /**
-   * Sets the human-readable physical minimum value.
-   * This parameter, together with the physical maximum value, is needed to
-   * convert hardware values sent by the PLC to engineering values.
-   * @param pMinVal the human-readable physical minimum value
-   */
-  public final void setPhysicalMinVal(final float pMinVal) {
-    this.physicalMinVal = pMinVal;
-  }
-
-  /**
-   * Sets the human-readable physical maximum value.
-   * This parameter, together with the physical minimum value, is needed to
-   * convert hardware values sent by the PLC to engineering values.
-   * @param pMaxVal the human-readable physical maximum value
-   */
-  public final void setPhysicalMaxVal(final float pMaxVal) {
-    this.physicalMaxVal = pMaxVal;
-  }
-
-  /**
-   * Sets the physical address of the tag, depending on PLC model used.
-   * @param pNativeAddress the physical address of the tag, depending on PLC model used.
-   */
-  public final void setNativeAddress(final String pNativeAddress) {
-    this.nativeAddress = pNativeAddress;
-  }
-
-  /**
-   * Sets the resolution of the A/D converter.
-   * @param pResolutionFactor the resolution of the A/D converter.
-   */
-  public final void setResolutionFactor(final int pResolutionFactor) {
-    this.resolutionFactor = pResolutionFactor;
-  }
-
-  /**
    * Set the pulse length in milliseconds for boolean commands.
    * If the command is not pulsed, this value must be 0. For pulsed commands,
    * the pulse length must be between 100 and 5000 ms.
@@ -394,9 +277,4 @@ public class PLCHardwareAddressImpl extends HardwareAddressImpl implements PLCHa
     this.commandPulseLength = pCmdPulseLength;
     return;
   }
-
-  public void setStringLen(int stringLen) {
-    this.stringLength = stringLen;
-  }
-
 }
