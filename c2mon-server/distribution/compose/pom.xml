@@ -18,6 +18,9 @@
     <!--module>c2mon-server</module-->
   </modules>
 
+  <properties>
+    <dockerfile-maven-version>1.4.3</dockerfile-maven-version>
+  </properties>
 
   <build>
     <plugins>
@@ -59,7 +62,7 @@
         <extension>
           <groupId>com.spotify</groupId>
           <artifactId>dockerfile-maven-extension</artifactId>
-          <version>1.4.3</version>
+          <version>${dockerfile-maven-version}</version>
         </extension>
   </extensions>
   </build>
