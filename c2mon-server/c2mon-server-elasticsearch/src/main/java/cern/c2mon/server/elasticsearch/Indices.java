@@ -8,17 +8,16 @@ import cern.c2mon.server.elasticsearch.tag.TagDocument;
 import cern.c2mon.server.elasticsearch.tag.config.TagConfigDocument;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.ResourceAlreadyExistsException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.client.Requests;
-import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.XContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * Static utility singleton for working with Elasticsearch indices.
@@ -75,39 +75,50 @@ public class Indices {
    *
    * @return true if the index was successfully created, false otherwise
    */
-  public static boolean create(String indexName, String type, String mapping) {
-    synchronized (Indices.class) {
-      if (exists(indexName)) {
-        return true;
-      }
+  public synchronized static boolean create(String indexName, String type, String mapping) {
+    if (exists(indexName)) {
+      return true;
+    }
 
-      CreateIndexRequestBuilder builder = self.client.getClient().admin().indices().prepareCreate(indexName);
-      builder.setSettings(Settings.builder()
-          .put("number_of_shards", self.properties.getShardsPerIndex())
-          .put("number_of_replicas", self.properties.getReplicasPerShard())
-          .build());
+    log.debug("Creating new index with name {}", indexName);
+
+    try {
+      Settings indexSettings = Settings.builder()
+        .put("number_of_shards", self.properties.getShardsPerIndex())
+        .put("number_of_replicas", self.properties.getReplicasPerShard())
+        .build();
+
+      XContentBuilder builder = XContentFactory.jsonBuilder()
+          .startObject()
+            .startObject("settings")
+              .value(indexSettings)
+            .endObject();
 
       if (mapping != null) {
-        builder.addMapping(type, mapping, XContentType.JSON);
+        builder.startObject("mappings")
+            .field(type, "MAPPINGR3PLAC3M3")
+            //.startObject(type).value(mapping).endObject() does not work
+            .endObject();
       }
 
-      log.debug("Creating new index with name {}", indexName);
-      boolean created;
+      String payload = builder.endObject().string();
 
-      try {
-        CreateIndexResponse response = builder.get();
-        created = response.isAcknowledged();
-      } catch (ResourceAlreadyExistsException ex) {
-        created = true;
+      if (mapping != null) {
+        payload = payload.replace("\"MAPPINGR3PLAC3M3\"", mapping);
       }
 
-      self.client.waitForYellowStatus();
-
-      if (created) {
+      HttpEntity entity = new NStringEntity(payload, ContentType.APPLICATION_JSON);
+      Response response = self.client.getLowLevelRestClient().performRequest("PUT", "/" + indexName, emptyMap(), entity);
+      if (response.getStatusLine().equals(RestStatus.OK)) {
         self.indexCache.add(indexName);
+        return true;
+      } else {
+        return false;
       }
 
-      return created;
+    } catch (IOException e) {
+      log.error("Could not create index {}", indexName, e);
+      return false;
     }
   }
 
@@ -122,49 +133,20 @@ public class Indices {
    * @return true if the index exists, false otherwise
    */
   public static boolean exists(String indexName) {
-    synchronized (Indices.class) {
-      boolean exists = self.indexCache.contains(indexName);
-      if (!exists) {
-        self.client.waitForYellowStatus();
-        IndexMetaData indexMetaData = self.client.getClient().admin().cluster()
-            .state(Requests.clusterStateRequest())
-            .actionGet()
-            .getState()
-            .getMetaData()
-            .index(indexName);
+    if (self.indexCache.contains(indexName)) {
+      return true;
+    }
 
-        if (indexMetaData != null) {
-          self.indexCache.add(indexName);
-          exists = true;
-        }
-      }
-      return exists;
+    final RestClient restClient = self.client.getLowLevelRestClient();
+    try {
+      final Response response = restClient.performRequest("HEAD", "/" + indexName);
+      return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+    } catch (IOException e) {
+      log.error("Error checking for existing of {} index", indexName, e);
+      return false;
     }
   }
 
-  /**
-   * Delete an index in Elasticsearch.
-   *
-   * @param indexName
-   *
-   * @return true if the request was acknowledged.
-   */
-  public static boolean delete(String indexName) {
-    synchronized (Indices.class) {
-      try {
-        DeleteIndexResponse response = self.client.getClient().admin().indices().delete(new DeleteIndexRequest(indexName)).get();
-        if (response.isAcknowledged()) {
-          self.indexCache.remove(indexName);
-          return true;
-        } else {
-          return false;
-        }
-      } catch (InterruptedException|ExecutionException e) {
-        log.error("Error while deleting index", e);
-        return false;
-      }
-    }
-  }
   /**
    * Generate an index for the given {@link TagDocument} based on its
    * timestamp.

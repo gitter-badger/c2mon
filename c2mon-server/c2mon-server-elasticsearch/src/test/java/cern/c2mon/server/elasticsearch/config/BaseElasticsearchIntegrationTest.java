@@ -25,14 +25,17 @@ import cern.c2mon.server.elasticsearch.MappingFactory;
 import cern.c2mon.server.elasticsearch.client.ElasticsearchClient;
 import cern.c2mon.server.elasticsearch.junit.CachePopulationRule;
 import cern.c2mon.server.supervision.config.SupervisionModule;
-import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.Response;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +51,6 @@ import java.util.concurrent.TimeoutException;
     ElasticsearchModule.class,
     CachePopulationRule.class
 })
-@Slf4j
 public abstract class BaseElasticsearchIntegrationTest {
 
   //the embedded ES node will start
@@ -62,17 +64,17 @@ public abstract class BaseElasticsearchIntegrationTest {
   public void waitForElasticSearch() throws InterruptedException, ExecutionException {
     try {
       CompletableFuture<Void> nodeReady = CompletableFuture.runAsync(() -> {
-        client.waitForYellowStatus();
+        //client.waitForYellowStatus();
         ElasticsearchProperties elasticsearchProperties = this.client.getProperties();
-        Indices.delete(elasticsearchProperties.getTagConfigIndex());
-        Indices.create(elasticsearchProperties.getTagConfigIndex(), "tag_config", MappingFactory.createTagConfigMapping());
         try {
-          //it takes some time for the index to be recreated, should do this properly
-          //by waiting for yellow status but it doesn't work?
-          Thread.sleep(500);
-        } catch (InterruptedException e) {
+          Response response = this.client.getLowLevelRestClient().performRequest("DELETE", "/" + elasticsearchProperties.getTagConfigIndex());
+        } catch (IOException e) {
           e.printStackTrace();
         }
+
+//        client.getClient().admin().indices().delete(new DeleteIndexRequest(elasticsearchProperties.getTagConfigIndex()));
+        Indices.create(elasticsearchProperties.getTagConfigIndex(), "tag_config", MappingFactory.createTagConfigMapping());
+
       });
       nodeReady.get(120, TimeUnit.SECONDS);
     } catch (TimeoutException e) {
