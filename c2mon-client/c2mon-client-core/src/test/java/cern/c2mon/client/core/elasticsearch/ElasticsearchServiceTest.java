@@ -5,19 +5,16 @@ import cern.c2mon.server.cache.EquipmentCache;
 import cern.c2mon.server.cache.ProcessCache;
 import cern.c2mon.server.cache.SubEquipmentCache;
 import cern.c2mon.server.cache.TagFacadeGateway;
-import cern.c2mon.server.cache.common.TagFacadeGatewayImpl;
 import cern.c2mon.server.common.datatag.DataTagCacheObject;
-import cern.c2mon.server.elasticsearch.Indices;
+import cern.c2mon.server.elasticsearch.IndicesRest;
 import cern.c2mon.server.elasticsearch.MappingFactory;
-import cern.c2mon.server.elasticsearch.client.ElasticsearchClient;
 import cern.c2mon.server.elasticsearch.client.ElasticsearchClientImpl;
 import cern.c2mon.server.elasticsearch.config.ElasticsearchProperties;
 import cern.c2mon.server.elasticsearch.tag.config.TagConfigDocumentConverter;
-import cern.c2mon.server.elasticsearch.tag.config.TagConfigDocumentIndexer;
+import cern.c2mon.server.elasticsearch.tag.config.TagConfigDocumentIndexerTransport;
 import cern.c2mon.server.elasticsearch.tag.config.TagConfigDocumentListener;
 import cern.c2mon.shared.client.configuration.ConfigConstants;
 import org.apache.http.annotation.NotThreadSafe;
-import org.easymock.EasyMock;
 import org.easymock.Mock;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
@@ -26,8 +23,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.powermock.reflect.Whitebox;
-import org.powermock.reflect.internal.WhiteboxImpl;
 import org.springframework.util.FileSystemUtils;
 
 import java.util.Collection;
@@ -55,8 +50,8 @@ public class ElasticsearchServiceTest {
 
   public ElasticsearchServiceTest() throws NodeValidationException {
     this.client = new ElasticsearchClientImpl(elasticsearchProperties);
-    Indices mustBeCreatedButVariableNotUsed = new Indices(this.client, elasticsearchProperties);
-    TagConfigDocumentIndexer indexer = new TagConfigDocumentIndexer(client, elasticsearchProperties);
+    IndicesRest mustBeCreatedButVariableNotUsed = new IndicesRest(this.client, elasticsearchProperties);
+    TagConfigDocumentIndexerTransport indexer = new TagConfigDocumentIndexerTransport(client, elasticsearchProperties);
     ProcessCache processCache = createNiceMock(ProcessCache.class);
     EquipmentCache equipmentCache = createNiceMock(EquipmentCache.class);
     SubEquipmentCache subequipmentCache = createNiceMock(SubEquipmentCache.class);
@@ -77,7 +72,7 @@ public class ElasticsearchServiceTest {
       CompletableFuture<Void> nodeReady = CompletableFuture.runAsync(() -> {
         //client.waitForYellowStatus();
         client.getClient().admin().indices().delete(new DeleteIndexRequest(elasticsearchProperties.getTagConfigIndex()));
-        Indices.create(elasticsearchProperties.getTagConfigIndex(), "tag_config", MappingFactory.createTagConfigMapping());
+        IndicesRest.create(elasticsearchProperties.getTagConfigIndex(), "tag_config", MappingFactory.createTagConfigMapping());
         try {
           Thread.sleep(1000); //it takes some time for the index to be recreated
         } catch (InterruptedException e) {

@@ -1,16 +1,14 @@
 package cern.c2mon.server.elasticsearch.client;
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
+import cern.c2mon.server.elasticsearch.config.ElasticsearchProperties;
 import org.elasticsearch.node.NodeValidationException;
 
 import java.io.IOException;
 
-public interface ElasticsearchClient {
+public interface ElasticsearchClient<T, CH> {
   void waitForYellowStatus();
 
-  ClusterHealthResponse getClusterHealth();
+  CH getClusterHealth();
 
   //@TODO "using Node directly within an application is not officially supported"
   //https://www.elastic.co/guide/en/elasticsearch/reference/5.5/breaking_50_java_api_changes.html
@@ -21,13 +19,9 @@ public interface ElasticsearchClient {
 
   void closeEmbeddedNode() throws IOException;
 
-  cern.c2mon.server.elasticsearch.config.ElasticsearchProperties getProperties();
+  ElasticsearchProperties getProperties();
 
-  org.elasticsearch.client.Client getClient();
+  T getClient();
 
   boolean isClusterYellow();
-
-  public RestClient getLowLevelRestClient();
-
-  public RestHighLevelClient getRestClient();
 }
