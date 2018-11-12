@@ -232,7 +232,7 @@ public class ElasticsearchService {
    * @return converted query results
    */
   public <T> T findByQuery(String query, Function<SearchResult, T> outputConverter, String indexName, String errorMessage) {
-    Search search = new Search.Builder(query).addIndex(indexName).build();
+    Search search = new Search.Builder(query).addIndex(indexName).setHeader("Content-Type", "application/json").build();
     try {
       SearchResult result = client.execute(search);
       return outputConverter.apply(result);
@@ -320,8 +320,7 @@ public class ElasticsearchService {
         "      }, {\n" +
         "        \"match\" : {\n" +
         "          \"metadata.%s\" : {\n" +
-        "            \"query\" : \"%s\",\n" +
-        "            \"type\" : \"boolean\"\n" +
+        "            \"query\" : \"%s\"\n" +
         "          }\n" +
         "        }\n" +
         "      } ]\n" +
@@ -373,8 +372,7 @@ public class ElasticsearchService {
         "  \"query\" : {\n" +
         "    \"match\" : {\n" +
         "      \"metadata.%s\" : {\n" +
-        "        \"query\" : \"%s\",\n" +
-        "        \"type\" : \"boolean\"\n" +
+        "        \"query\" : \"%s\"\n" +
         "      }\n" +
         "    }\n" +
         "  }\n" +
