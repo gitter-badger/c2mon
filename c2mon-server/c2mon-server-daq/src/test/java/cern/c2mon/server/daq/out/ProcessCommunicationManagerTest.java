@@ -53,7 +53,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Mark Brightwell
  *
  */
-@Ignore("This test is flaky")
+//@Ignore("This test is flaky")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {
     CommonModule.class,

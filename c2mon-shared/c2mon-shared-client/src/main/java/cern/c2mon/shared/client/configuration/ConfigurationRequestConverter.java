@@ -35,9 +35,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.stereotype.Component;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
