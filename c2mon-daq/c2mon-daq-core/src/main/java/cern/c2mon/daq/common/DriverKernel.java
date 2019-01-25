@@ -315,7 +315,7 @@ public class DriverKernel implements ApplicationContextAware {
       try {
         equipmentThread.join();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        log.error("There was a problem while running a thread", e);
       }
     } // for
 
