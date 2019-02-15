@@ -35,7 +35,7 @@ public class HsqlDatabaseBuilder {
       // Start an in-process, in-memory HSQL server
       dataSource = new EmbeddedDatabaseBuilder().setType(HSQL).setName("c2mondb").build();
     } else {
-      log.debug("Creating HSQL database at URL "+url);
+      log.debug("Creating HSQL database at URL {}",url);
       dataSource = DataSourceBuilder.create().url(url).username(username).password(password).build();
     }
 
