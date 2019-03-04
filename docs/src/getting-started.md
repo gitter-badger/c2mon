@@ -93,7 +93,7 @@ The properties listed in the file can just as well be set as Java system propert
 
 #### Persisting C2MON data in an Oracle database
 
-Note that Oracle database drivers (unlike MySQL and HSQLDB) are not distributed with C2MON. In order to persist data in an Oracle database, you must [download the Oracle JDBC drivers](http://www.oracle.com/technetwork/database/features/jdbc/index.html) and mount them as volumes in your Docker container.
+Note that Oracle database drivers (unlike MySQL and HSQLDB) are not distributed with C2MON. In order to persist data in an Oracle database, you must [download the Oracle JDBC drivers](https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html) and mount them as volumes in your Docker container.
 For example, if the JDBC driver libraries ```ojdbc.jar``` and ```orai18n.jar``` are available in the current folder, you can run :
 
 ```bash
