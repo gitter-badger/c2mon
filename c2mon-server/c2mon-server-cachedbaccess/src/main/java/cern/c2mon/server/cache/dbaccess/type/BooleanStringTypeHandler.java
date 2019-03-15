@@ -10,6 +10,11 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
+/**
+ * MyBatis type handler that converts between Boolean and VARCHAR. 
+ * It considers value "Y" as <code>true</code>, along with legacy string value "ACTIVE".
+ * Any other value is considered as  <code>false</code>.
+ */
 @MappedTypes(Boolean.class)
 @MappedJdbcTypes(JdbcType.VARCHAR)
 public class BooleanStringTypeHandler extends BaseTypeHandler<Boolean> {
