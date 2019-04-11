@@ -319,7 +319,7 @@ spec:
         io.kompose.service: grafana
     spec:
       containers:
-      - image: grafana/grafana:6.1.2
+      - image: cernoss/c2mon-grafana:1.8.41-SNAPSHOT
         name: grafana
         ports:
         - containerPort: 3000
