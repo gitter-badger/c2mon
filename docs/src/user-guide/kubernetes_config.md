@@ -103,9 +103,9 @@ This is by default running in: http://your_cluster_ip:31322/c2mon-web-ui/
 
 The C@MON cluster also comes with Grafana instance, preconfigured with the MySQL datasource and a dashboard for viewing the data provided by the hostmetrics DAQ!
 
-To perform the first time login use admin/admin and then change the password if desired
+Check it out in http://your_cluster_ip:31323/ and select the hostmetrics dashboard!
 
-Check it out in http://your_cluster_ip:31323/
+To perform any changes visit http://your_cluster_ip:31323/login, use admin/admin and then change the password if desired
 
 <!-- ### Inspecting the data
 
