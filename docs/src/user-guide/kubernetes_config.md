@@ -99,13 +99,13 @@ The C2MON cluster comes with a web-based application called [c2mon-web-ui](http:
 
 This is by default running in: http://your_cluster_ip:31322/c2mon-web-ui/
 
-## Grafana metrics
+## Grafana dashboards
 
-The C@MON cluster also comes with Grafana instance, preconfigured with the MySQL datasource and a dashboard for viewing the data provided by the hostmetrics DAQ!
+The C2MON cluster also comes with a Grafana instance, preconfigured with the MySQL datasource and a dashboard for consulting the data provided by the hostmetrics DAQ.
 
-Check it out in http://your_cluster_ip:31323/ and select the hostmetrics dashboard!
+Check it out in http://your_cluster_ip:31323/ and select the **hostmetrics** dashboard.
 
-To perform any changes visit http://your_cluster_ip:31323/login, use admin/admin and then change the password if desired
+To perform any changes visit http://your_cluster_ip:31323/login, use `admin/admin` and then change the password if desired.
 
 <!-- ### Inspecting the data
 
