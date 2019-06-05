@@ -69,25 +69,34 @@ public class ActiveJmsSender implements JmsSender {
     }
     return jmsTemplate.execute(session -> {
       String returnString = null;
-      TemporaryTopic replyTopic = session.createTemporaryTopic();
-      TextMessage textMessage = session.createTextMessage();
-      textMessage.setText(text);
-      textMessage.setJMSReplyTo(replyTopic);
+      TemporaryTopic replyTopic = null;
+      MessageConsumer consumer = null;
+      try {
+        replyTopic = session.createTemporaryTopic();
+        TextMessage textMessage = session.createTextMessage();
+        textMessage.setText(text);
+        textMessage.setJMSReplyTo(replyTopic);
 
-      MessageConsumer consumer = session.createConsumer(replyTopic);
+        consumer = session.createConsumer(replyTopic);
 
-      Destination requestDestination = new ActiveMQQueue(jmsListenerQueue);
-      MessageProducer messageProducer = session.createProducer(requestDestination);
-      messageProducer.send(textMessage);
+        Destination requestDestination = new ActiveMQQueue(jmsListenerQueue);
+        MessageProducer messageProducer = session.createProducer(requestDestination);
+        messageProducer.send(textMessage);
 
-      // Wait for reply
-      Message replyMessage = consumer.receive(timeout);
-      if (replyMessage != null) {
-        if (replyMessage instanceof TextMessage) {
-          returnString = ((TextMessage) replyMessage).getText();
-        } else {
-          LOGGER.warn("Non-text message received as JMS reply from ActiveMQ - unable to process");
+        // Wait for reply
+        Message replyMessage = consumer.receive(timeout);
+        if (replyMessage != null) {
+          if (replyMessage instanceof TextMessage) {
+            returnString = ((TextMessage) replyMessage).getText();
+          } else {
+            LOGGER.warn("Non-text message received as JMS reply from ActiveMQ - unable to process");
+          }
         }
+      } finally {
+        if (consumer != null)
+          consumer.close();
+        if (replyTopic != null)
+          replyTopic.delete();
       }
       return returnString;
     }, true);
