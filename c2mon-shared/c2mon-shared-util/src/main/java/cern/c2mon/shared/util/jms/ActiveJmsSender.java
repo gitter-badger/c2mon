@@ -92,10 +92,11 @@ public class ActiveJmsSender implements JmsSender {
           }
         }
       } finally {
-        if (consumer != null)
+        if (consumer != null) {
           consumer.close();
-        if (replyTopic != null)
+        } if (replyTopic != null) {
           replyTopic.delete();
+        }
       }
       return returnString;
     }, true);
