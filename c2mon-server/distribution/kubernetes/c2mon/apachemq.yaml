@@ -15,7 +15,7 @@ spec:
         type: mq
     spec:
       containers:
-      - image: cern/c2mon-ext:activemq-5.15.6-c2mon-1.9.2
+      - image: cern/c2mon-ext:activemq-5.15.6-c2mon-1.9.0
         name: mq
         ports:
         - containerPort: 61616
