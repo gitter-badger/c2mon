@@ -6,8 +6,6 @@ generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
   - name: c2mon-server-properties
-    envs:
-      - c2mon-server.properties
+    env: c2mon-server.properties
   - name: c2mon-daq-properties
-    envs:
-      - c2mon-daq.properties
+    env: c2mon-daq.properties

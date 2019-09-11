@@ -5,8 +5,6 @@ generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
   - name: c2mon-client-properties
-    envs:
-      - c2mon-client.properties
+    env: c2mon-client.properties
   - name: grafana-config
-    envs:
-      - grafana.properties
+    env: grafana.properties

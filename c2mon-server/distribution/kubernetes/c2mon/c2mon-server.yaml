@@ -15,11 +15,11 @@ spec:
         type: c2mon-server
     spec:
       containers:
+      - name: c2mon-server
         envFrom:
           - configMapRef:
               name: c2mon-server-properties
         image: cern/c2mon:1.9.2
-        name: c2mon-server
       restartPolicy: Always
 ---
 apiVersion: v1
