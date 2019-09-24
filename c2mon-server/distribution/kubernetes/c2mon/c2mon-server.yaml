@@ -19,7 +19,7 @@ spec:
         envFrom:
           - configMapRef:
               name: c2mon-server-properties
-        image: cern/c2mon:1.8.45
+        image: cern/c2mon:1.9.3-SNAPSHOT
       restartPolicy: Always
 ---
 apiVersion: v1
