@@ -60,7 +60,7 @@ public class AlarmDocumentConverterTestSuite {
     document = (AlarmDocument) document.getObject(json);
 
     assertEquals(alarm.getId().intValue(), document.get("id"));
-    assertEquals(alarm.getTagId().intValue(), document.get("tagId"));
+    assertEquals(alarm.getDataTagId().intValue(), document.get("tagId"));
     assertEquals(alarm.getFaultFamily(), document.get("faultFamily"));
     assertEquals(alarm.getFaultMember(), document.get("faultMember"));
     assertEquals(alarm.getFaultCode(), document.get("faultCode"));

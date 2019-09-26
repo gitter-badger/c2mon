@@ -16,10 +16,6 @@
  *****************************************************************************/
 package cern.c2mon.server.client.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import cern.c2mon.server.common.alarm.Alarm;
 import cern.c2mon.server.common.alarm.TagWithAlarms;
 import cern.c2mon.server.common.control.ControlTag;
@@ -35,6 +31,10 @@ import cern.c2mon.shared.client.device.TransferDevice;
 import cern.c2mon.shared.client.device.TransferDeviceImpl;
 import cern.c2mon.shared.client.tag.*;
 import cern.c2mon.shared.common.datatag.DataTagQualityImpl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static cern.c2mon.shared.common.type.TypeConverter.getType;
 import static cern.c2mon.shared.common.type.TypeConverter.isKnownClass;
@@ -151,7 +151,7 @@ public abstract class TransferObjectFactory {
               .info(alarm.getInfo())
               .alarmConditionDescription(alarm.getCondition().getDescription())
               .alarmConditionXml(alarm.getCondition().getXMLCondition())
-              .tagId(alarm.getTagId())
+              .tagId(alarm.getDataTagId())
               .timestamp(alarm.getTimestamp())
               .active(alarm.isActive())
               .oscillating(alarm.isOscillating())
@@ -292,7 +292,7 @@ public abstract class TransferObjectFactory {
                 .faultMemeber(alarm.getFaultMember())
                 .faultFamily(alarm.getFaultFamily())
                 .info(alarm.getInfo())
-                .tagId(alarm.getTagId())
+                .tagId(alarm.getDataTagId())
                 .timestamp(alarm.getTimestamp())
                 .active(alarm.isActive())
                 .oscillating(alarm.isOscillating())
