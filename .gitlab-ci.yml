@@ -45,14 +45,14 @@ trigger_build:
 deploy_build:
   stage: deploy
   image: jekyll/builder:3.8.5
+  script:
+    - cd docs
+    - jekyll build --config "_config.yml,_overwrite_url.yml"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     untracked: true
     paths:
       - docs/_site
-  script:
-    - cd docs
-    - jekyll build --config "_config.yml,_overwrite_url.yml"
   only:
     - issue-241-cayman
 
@@ -60,9 +60,6 @@ deploy_docs:
   stage: deploy
   cache:
     key: ${CI_COMMIT_REF_SLUG}
-    untracked: true
-    paths:
-      - docs/_site
   script:
     - sshpass -p "${KRB_PASSWORD}" scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
