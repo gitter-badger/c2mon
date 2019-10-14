@@ -42,15 +42,29 @@ trigger_build:
   only:
   - master
 
-deploy_docs:
+deploy_build:
   stage: deploy
   image: jekyll/builder:3.8.5
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    untracked: true
+    paths:
+      - docs/_site
   script:
     - cd docs
     - jekyll build --config "_config.yml,_overwrite_url.yml"
-#    - docker run --rm --volume="$PWD:/srv/jekyll" --volume="/tmp/vendor/bundle:/usr/local/bundle" jekyll/jekyll:3.8.5 jekyll build --config "_config.yml,_overwrite_url.yml"
-#    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site/* ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/www/c2mon.web.cern.ch/docs
-    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}:${KRB_PASSWORD}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
+  only:
+    - issue-241-cayman
+
+deploy_docs:
+  stage: deploy
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    untracked: true
+    paths:
+      - docs/_site
+  script:
+    - sshpass -p "${KRB_PASSWORD}" scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
     - issue-241-cayman
 
