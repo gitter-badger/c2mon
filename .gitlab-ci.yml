@@ -43,13 +43,15 @@ trigger_build:
   - master
 
 deploy_build:
-  stage: deploy
+  stage: build
   image: jekyll/builder:3.8.5
   script:
     - cd docs
     - jekyll build --config "_config.yml,_overwrite_url.yml"
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
+  artifacts:
+    name: site
+    when: on_success
+    expire_in: 7 days
     untracked: true
     paths:
       - _site
@@ -58,11 +60,12 @@ deploy_build:
 
 deploy_docs:
   stage: deploy
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
+  dependencies:
+    - deploy_build
   script:
     - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
-    - scp -v -o 'StrictHostKeyChecking no' -o 'GSSAPITrustDNS yes' -o 'GSSAPIDelegateCredentials yes' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
+    - ls
+    - scp -o 'StrictHostKeyChecking no' -o 'GSSAPITrustDNS yes' -o 'GSSAPIDelegateCredentials yes' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
     - issue-241-cayman
 
