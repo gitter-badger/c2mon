@@ -6,7 +6,7 @@ summary:  A Hello World guide to get C2MON up and running with some sample data.
 
 ## Using Kubernetes
 
-Are you a Kubernetes user? You can quickly create the full C2MON stack described below using the [K8S Quickstart](user-guide/kubernetes_config). Alternatively, read on to learn how to create a C2MON stack step by step!
+Are you a Kubernetes user? You can quickly create the full C2MON stack described below using the [K8S Quickstart](user-guide/kubernetes-configuration). Alternatively, read on to learn how to create a C2MON stack step by step!
 
 ## Running the server
 
@@ -72,12 +72,8 @@ It is also advisable to take a look into the `log/c2mon.log` file. When C2MON st
 ... [main] cern.c2mon.server.ServerStartup : C2MON server is now initialised
 ```
 
-<<<<<<< HEAD
-### Using the Docker image
-=======
 
 ## Using the Docker image
->>>>>>> Add frontMatter to all pages
 
 We push a Docker container of the server to the [CERN Docker registry](https://hub.docker.com/r/cern/c2mon).
 To run the image:
