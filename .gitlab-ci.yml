@@ -42,7 +42,7 @@ trigger_build:
   only:
   - master
 
-.deploy_build:
+deploy_build:
   stage: deploy
   image: jekyll/builder:3.8.5
   script:
