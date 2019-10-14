@@ -60,8 +60,8 @@ trigger_build:
 
 deploy_docs:
   stage: deploy
-  dependencies:
-    - deploy_build
+#  dependencies:
+#    - deploy_build
   script:
     - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
     - ls docs/_site
