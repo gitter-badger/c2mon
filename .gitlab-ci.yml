@@ -3,6 +3,12 @@ stages:
   - build
   - deploy
   - sonar
+  
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  
 
 clean_elasticsearch:
   type: clean
@@ -37,15 +43,18 @@ trigger_build:
   - master
 
 deploy_docs:
-  type: deploy
+  stage: deploy
+  tags: 
+    - docker-privileged
+  services:    
+    - docker:19.03.0-dind
   script:
-    - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
     - cd docs
     - docker run --rm -it --volume="$PWD:/srv/jekyll" --volume="/tmp/vendor/bundle:/usr/local/bundle" jekyll/jekyll:3.8.5 jekyll build --config _config.yml,_overwrite_url.yml
-    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site/* ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/www/c2mon.web.cern.ch/docs
-    - cd ..
+#    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site/* ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/www/c2mon.web.cern.ch/docs
+    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}:${KRB_PASSWORD}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
-    - master
+    - issue-241-cayman
 
 sonar_preview:
   type: sonar
