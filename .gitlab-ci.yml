@@ -51,7 +51,7 @@ deploy_docs:
     - docker:19.03.0-dind
   script:
     - cd docs
-    - docker run --rm --volume="$PWD:/srv/jekyll" --volume="/tmp/vendor/bundle:/usr/local/bundle" jekyll/jekyll:3.8.5 jekyll build --config _config.yml,_overwrite_url.yml
+    - docker run --rm --volume="$PWD:/srv/jekyll" --volume="/tmp/vendor/bundle:/usr/local/bundle" jekyll/jekyll:3.8.5 jekyll build --config "_config.yml,_overwrite_url.yml"
 #    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site/* ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/www/c2mon.web.cern.ch/docs
     - scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}:${KRB_PASSWORD}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
