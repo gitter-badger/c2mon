@@ -61,7 +61,8 @@ deploy_docs:
   cache:
     key: ${CI_COMMIT_REF_SLUG}
   script:
-    - sshpass -p "${KRB_PASSWORD}" scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
+    - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
+    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
     - issue-241-cayman
 
