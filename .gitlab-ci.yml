@@ -62,7 +62,7 @@ deploy_docs:
     key: ${CI_COMMIT_REF_SLUG}
   script:
     - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
-    - scp -v -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
+    - scp -v -o 'StrictHostKeyChecking no' -o 'GSSAPITrustDNS yes' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
     - issue-241-cayman
 
