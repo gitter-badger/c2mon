@@ -52,7 +52,7 @@ deploy_build:
     key: ${CI_COMMIT_REF_SLUG}
     untracked: true
     paths:
-      - docs/_site
+      - _site
   only:
     - issue-241-cayman
 
