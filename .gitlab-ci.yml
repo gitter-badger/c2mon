@@ -10,8 +10,9 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 
-.clean_elasticsearch:
-  type: clean
+clean_elasticsearch:
+  stage: clean
+  dependencies: []
   variables:
     GIT_STRATEGY: none
   script:
@@ -20,15 +21,17 @@ variables:
 
 # Fully build and publish master branch
 build_and_publish:
-  type: build
+  stage: build
+  dependencies: []
   script:
     - mvn -q -U -B clean deploy --settings settings.xml -Ddependencies.set.direct
   only:
     - master
 
 # Just run tests on feature branches
-.build:
-  type: build
+build:
+  stage: build
+  dependencies: []
   script:
     - mvn -q -U -B clean test -DskipDocker=true --settings settings.xml -Ddependencies.set.direct --debug -X
   except:
@@ -37,6 +40,7 @@ build_and_publish:
 
 trigger_build:
   stage: deploy
+  dependencies: []
   script:
     - "curl -X POST -F token=$TIM_SERVER_TOKEN -F ref=master https://gitlab.cern.ch/api/v4/projects/9859/trigger/pipeline"
   only:
@@ -64,13 +68,13 @@ deploy_docs:
     - deploy_build
   script:
     - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
-    - ls docs/_site
     - scp -o 'StrictHostKeyChecking no' -o 'GSSAPITrustDNS yes' -o 'GSSAPIDelegateCredentials yes' -B -r docs/_site ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
   only:
     - issue-241-cayman
 
-.sonar_preview:
-  type: sonar
+sonar_preview:
+  stage: sonar
+  dependencies: []
   script:
     - mvn -q -U -B clean compile sonar:sonar -Dmaven.test.skip=true -DskipDocker=true -Dsonar.host.url=${SONAR_URL} -Dsonar.analysis.mode=preview -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID -Dsonar.gitlab.max_major_issues_gate=0 --settings settings.xml
   except:
@@ -79,6 +83,7 @@ deploy_docs:
 
 quality_assurance:
   stage: sonar
+  dependencies: []
   script:
     - mvn package sonar:sonar -Dmaven.test.skip=true -DskipDocker=true -Dsonar.host.url=${SONAR_URL} -Dsonar.dependencyCheck.reportPath=target/dependency-check-report.xml --settings settings.xml
   only:
