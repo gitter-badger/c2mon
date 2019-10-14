@@ -3,12 +3,12 @@ stages:
   - build
   - deploy
   - sonar
-  
+
 variables:
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  
+
 
 .clean_elasticsearch:
   type: clean
@@ -44,13 +44,14 @@ trigger_build:
 
 deploy_docs:
   stage: deploy
-  tags: 
+  tags:
     - docker-privileged
   image: gitlab-registry.cern.ch/industrial-controls/sw-infra/mvn-dind:baseline
-  services:    
+  services:
     - docker:19.03.0-dind
   script:
     - cd docs
+    - ls
     - docker run --rm --volume="$PWD:/srv/jekyll" --volume="/tmp/vendor/bundle:/usr/local/bundle" jekyll/jekyll:3.8.5 jekyll build --config "_config.yml,_overwrite_url.yml"
 #    - scp -o 'StrictHostKeyChecking no' -B -r docs/_site/* ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/www/c2mon.web.cern.ch/docs
     - scp -o 'StrictHostKeyChecking no' -B -r docs/_site ${KRB_USERNAME}:${KRB_PASSWORD}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/public
