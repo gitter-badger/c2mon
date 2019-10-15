@@ -3,6 +3,7 @@ layout:   post
 title:    Getting Started
 summary:  A Hello World guide to get C2MON up and running with some sample data.
 ---
+{{""}}
 
 ## Using Kubernetes
 

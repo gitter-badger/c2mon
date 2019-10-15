@@ -13,8 +13,10 @@
 
 {% capture hit %}
   {% if post.subitems %}
-    {% assign fullUrl = fullUrl | append:"/" %}
+    {% assign fullUrl = fullUrl | append:"/index.html" %}
     {{ include.content | where_exp:"post","post.url == fullUrl" | map: "content" }}
+<!-- For further invocations, we don't need the suffix -->
+    {% assign fullUrl = fullUrl | replace:"index.html","" %}
     {%- include dfs.html tree=post.subitems base=fullUrl content=include.content -%}
   {% else %}
     {% assign fullUrl = fullUrl | append:".html" %}
@@ -22,9 +24,9 @@
   {% endif %}
 {% endcapture %}
 
-{% if hit.size > 0 %}
+<!--{% if hit.size > 0 %}-->
   {{ hit }}
-{% endif %}
+<!--{% endif %}-->
 
 
 {% endfor %}

@@ -43,8 +43,6 @@ The Sub-Equipment also has a number of DataTags corresponding to data points bei
 
 The connection between the Sub-Equipment and its parent Equipment is also monitored via StatusTags, AliveTags and CommFaultTags.
 
-
-<a id="_configuration_structure"></a>
 # Configuration structure
 
 The data structure of a DAQ configuration is strictly hierarchical.
