@@ -1,93 +1,39 @@
 stages:
-  - clean
-  - build
-  - deploy
-  - sonar
+  - cache
 
-clean_elasticsearch:
-  stage: clean
-  tags: 
-    - c2mon
-  dependencies: []
-  variables:
-    GIT_STRATEGY: none
-  script:
-    - killall -q java || true
-    - rm -Rf /tmp/es-cluster*
+variables:
+  #  MAVEN_OPTS: -Djavax.net.ssl.trustStore=${CACERTS}
+  # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
+  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+  # As of Maven 3.3.0 instead of this you may define these options in `.mvn $MAVEN_CLI_OPTS/maven.config` so the same config is used
+  # when running from the command line.
+  MAVEN_CLI_OPTS:
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    -Dhttps.protocols=TLSv1.2
+    -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+    -Dorg.slf4j.simpleLogger.showDateTime=true
+    -Djava.awt.headless=true
+    --batch-mode --errors --fail-at-end --show-version --settings $CI_PROJECT_DIR/settings.xml
+    -Dconfig.vues.npm.git.remote.skip=false
+    --threads 2C
 
-# Fully build and publish master branch
-build_and_publish:
-  stage: build
-  tags: [c2mon]
-  dependencies: []
-  script:
-    - mvn -q -U -B clean deploy --settings settings.xml -Ddependencies.set.direct
-  only:
-    - master
+# Will be used by other branches
+cache:
+  key: "base"
+  policy: pull-push
+  paths:
+    - .m2
 
-# Just run tests on feature branches
-build:
-  stage: build
-  tags: [c2mon]
-  dependencies: []
+# Preloads the local repository with cached dependencies
+build_cache:
+  stage: cache
   script:
-    - mvn -q -U -B clean test -DskipDocker=true --settings settings.xml -Ddependencies.set.direct --debug -X
-  except:
-    - master
-    - tags
-
-build_docs:
-  stage: build
-  tags: [docker]
-  image: jekyll/builder:3.8.5
-  script:
-    - cd docs
-    - jekyll build --config "_config.yml,_overwrite_url.yml"
-  artifacts:
-    name: site
-    when: on_success
-    expire_in: 7 days
-    untracked: true
-    paths:
-      - _site
-  only:
-    - master
-
-trigger_build:
-  stage: deploy
-  tags: [c2mon]
-  dependencies: []
-  script:
-    - "curl -X POST -F token=$TIM_SERVER_TOKEN -F ref=master https://gitlab.cern.ch/api/v4/projects/9859/trigger/pipeline"
-  only:
-  - master
-
-deploy_docs:
-  stage: deploy
-  tags: [no-runner-9]
-  dependencies:
-    - build_docs
-  script:
-    - echo ${KRB_PASSWORD} | kinit ${KRB_USERNAME}@CERN.CH
-    - scp -o 'StrictHostKeyChecking no' -o 'GSSAPITrustDNS yes' -o 'GSSAPIDelegateCredentials yes' -B -r docs/_site/* ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/c/${KRB_USERNAME}/www/c2mon.web.cern.ch/docs
-  only:
-    - master
-
-sonar_preview:
-  stage: sonar
-  tags: [c2mon]
-  dependencies: []
-  script:
-    - mvn -q -U -B clean compile sonar:sonar -Dmaven.test.skip=true -DskipDocker=true -Dsonar.host.url=${SONAR_URL} -Dsonar.analysis.mode=preview -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID -Dsonar.gitlab.max_major_issues_gate=0 --settings settings.xml
-  except:
-    - master
-    - tags
-
-quality_assurance:
-  stage: sonar
-  tags: [c2mon]
-  dependencies: []
-  script:
-    - mvn package sonar:sonar -Dmaven.test.skip=true -DskipDocker=true -Dsonar.host.url=${SONAR_URL} -Dsonar.dependencyCheck.reportPath=target/dependency-check-report.xml --settings settings.xml
-  only:
-    - master
+    # This variable is being set at the TIM level and can affect our builds
+    - export MAVEN_OPTS=""
+    # We wish to build cache for master - this branch WILL fall behind
+    - git checkout master
+    # Nuke existing repo
+    - rm -rf .m2 node
+    - ./mvnw $MAVEN_CLI_OPTS -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
+    #  Will force frontend related tasks, mainly node install
+    - ./mvnw $MAVEN_CLI_OPTS generate-resources
