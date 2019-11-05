@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2010-2016 CERN. All rights not expressly granted are reserved.
+ * Copyright (C) 2010-2019 CERN. All rights not expressly granted are reserved.
  *
  * This file is part of the CERN Control and Monitoring Platform 'C2MON'.
  * C2MON is free software: you can redistribute it and/or modify it under the
@@ -38,6 +38,8 @@ import static junit.framework.TestCase.assertEquals;
 @RunWith(JUnit4.class)
 public class AlarmDocumentConverterTests {
 
+  private static final String TIMESTAMP_PROPERTY = "timestamp";
+
   private AlarmValueDocumentConverter converter = new AlarmValueDocumentConverter();
 
   @Test
@@ -58,7 +60,7 @@ public class AlarmDocumentConverterTests {
     assertEquals(alarm.getFaultCode(), document.get("faultCode"));
     assertEquals(alarm.isActive(), document.get("active"));
     assertEquals(alarm.getInfo(), document.get("info"));
-    assertEquals(alarm.getTimestamp().getTime(), document.get("timestamp"));
+    assertEquals(alarm.getTimestamp().getTime(), document.get(TIMESTAMP_PROPERTY));
 
     Map<String, Object> metadata = (Map<String, Object>) document.get("metadata");
     assertEquals(alarm.getMetadata().getMetadata().get("building"), metadata.get("building"));
@@ -73,7 +75,7 @@ public class AlarmDocumentConverterTests {
   @Test
   public void convertZeroTimestamp() throws DataFallbackException {
     Alarm alarm = EntityUtils.createAlarm();
-    Whitebox.setInternalState(alarm, "timestamp", new Timestamp(0));
+    Whitebox.setInternalState(alarm, TIMESTAMP_PROPERTY, new Timestamp(0));
     AlarmDocument document = converter.convert(alarm);
 
     // Serialize
@@ -81,7 +83,7 @@ public class AlarmDocumentConverterTests {
 
     // Deserialize
     document = (AlarmDocument) document.getObject(json);
-    assertEquals(Long.class, document.get("timestamp").getClass());
-    assertEquals(0L, document.get("timestamp"));
+    assertEquals(Long.class, document.get(TIMESTAMP_PROPERTY).getClass());
+    assertEquals(0L, document.get(TIMESTAMP_PROPERTY));
   }
 }
