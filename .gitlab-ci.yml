@@ -21,8 +21,7 @@ build_and_publish:
 build:
   type: build
   script:
-    - id
-#    - mvn -q -U -B clean test -DskipDockerBuild -DskipDockerTag -Djavax.net.ssl.trustStore=${CACERTS} --settings settings.xml -Ddependencies.set.direct --debug -X
+    - mvn -q -U -B clean test -DskipDockerBuild -DskipDockerTag -Djavax.net.ssl.trustStore=${CACERTS} --settings settings.xml -Ddependencies.set.direct --debug -X
   except:
     - master
     
