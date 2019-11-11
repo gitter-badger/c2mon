@@ -53,13 +53,13 @@ public class ElasticsearchSuiteTest {
     return properties;
   }
 
-  @BeforeClass
-  public static void setUpClass() {
-    EmbeddedElasticsearchManager.start(properties);
-  }
-
-  @AfterClass
-  public static void cleanup() {
-    EmbeddedElasticsearchManager.stop();
-  }
+//  @BeforeClass
+//  public static void setUpClass() {
+//    EmbeddedElasticsearchManager.start(properties);
+//  }
+//
+//  @AfterClass
+//  public static void cleanup() {
+//    EmbeddedElasticsearchManager.stop();
+//  }
 }
