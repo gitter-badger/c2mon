@@ -14,44 +14,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-package cern.c2mon.server.common.alarm;
+package cern.c2mon.shared.client.alarm.condition;
 
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import cern.c2mon.shared.common.type.TypeConverter;
+import org.apache.commons.lang.ArrayUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import cern.c2mon.shared.common.type.TypeConverter;
 import cern.c2mon.shared.util.parser.SimpleXMLParser;
 
 
 /**
  * <b>Imported as-is into C2MON.</b>
- *
- * <p>Common interface for defining TIM alarm conditions.
- *
+ * <p/>
+ * Common interface for defining TIM alarm conditions.
+ * <p/>
  * AlarmCondition objects are used in the TIM system (by the AlarmCacheObject
  * as well as the Alarm entity bean) in order to provide a simple means for
  * finding out whether the state of an alarm is supposed to be "active" or
  * "terminated" when a new value arrives.
- *
+ * <p/>
  * AlarmCondition is Serializable. Make sure to define a serialVersionUID in
  * all subclasses in order to make sure that no serialization problems occur
  * after minor modifications in the classes!
  *
  * @author Jan Stowisek
- * @version $Revision: 1.13 $ ($Date: 2007/07/04 12:38:53 $ - $State: Exp $)
- * @see cern.c2mon.server.alarm.AlarmLocal
- * @see cern.c2mon.server.common.alarm.AlarmCacheObject
- * @see cern.laser.source.FaultState
  */
-
 public abstract class AlarmCondition implements Serializable {
 
   /** Serial version UID */
@@ -62,14 +59,14 @@ public abstract class AlarmCondition implements Serializable {
    * <code>cern.laser.source.alarmsysteminterface.FaultState</code>
    * to avoid dependencies.
    */
-  public final static String ACTIVE = "ACTIVE";
+  public static final String ACTIVE = "ACTIVE";
 
   /**
    * The terminate fault state descriptor. Copied from
    * <code>cern.laser.source.alarmsysteminterface.FaultState</code>
    * to avoid dependencies.
    */
-  public final static String TERMINATE = "TERMINATE";
+  public static final String TERMINATE = "TERMINATE";
 
   private static SimpleXMLParser xmlParser = null;
 
@@ -85,8 +82,12 @@ public abstract class AlarmCondition implements Serializable {
    * Clone method
    * @return a deep clone of this AlarmCondition object.
    */
+  @Override
   public abstract Object clone();
 
+  public final String getXMLCondition() {
+    return this.toConfigXML();
+  }
 
   /**
    * Returns a standardised XML representation of the AlarmCondition object.
@@ -95,11 +96,19 @@ public abstract class AlarmCondition implements Serializable {
    */
   public final synchronized String toConfigXML() {
     // The concrete subclass of AlarmCondition
-    Class conditionClass = this.getClass();
+    Class<?> conditionClass = this.getClass();
     // The declared fields of this subclass
     Field[] fields = conditionClass.getDeclaredFields();
+
+
+    Class<?> superClass = conditionClass.getSuperclass();
+    while (superClass != null && superClass != AlarmCondition.class && superClass != Object.class) {
+      fields = (Field[]) ArrayUtils.addAll(fields, superClass.getDeclaredFields());
+      superClass = superClass.getSuperclass();
+    }
+
     // Temporary variable for constructing the XML string
-    StringBuffer str = new StringBuffer();
+    StringBuilder str = new StringBuilder();
     // Temporary variable for storing the XML name of a field
     String fieldXMLName = null;
     // Temporary variable for storing the class name of a field's value
@@ -112,14 +121,14 @@ public abstract class AlarmCondition implements Serializable {
     str.append(conditionClass.getName());
     str.append("\">\n");
 
-    for (int i = 0; i < fields.length; i++) {
-      if (Modifier.isProtected(fields[i].getModifiers())
-          && !Modifier.isFinal(fields[i].getModifiers())) {
+    for (Field field : fields) {
+      if (!Modifier.isFinal(field.getModifiers())) {
         try {
-          fieldVal = fields[i].get(this);
+          field.setAccessible(true);
+          fieldVal = field.get(this);
           if (fieldVal != null) {
             fieldClassName = fieldVal.getClass().getName();
-            fieldXMLName = encodeFieldName(fields[i].getName());
+            fieldXMLName = encodeFieldName(field.getName());
 
             str.append("  <");
             str.append(fieldXMLName);
@@ -137,7 +146,6 @@ public abstract class AlarmCondition implements Serializable {
             str.append(">\n");
           }
         } catch (IllegalAccessException iae) {
-          iae.printStackTrace();
           throw new RuntimeException(iae);
         }
       }
@@ -149,28 +157,28 @@ public abstract class AlarmCondition implements Serializable {
 
   /**
    * Create an AlarmCondition object from its standardized XML representation.
-   * @param pElement DOM element containing the XML representation of an
+   * @param element DOM element containing the XML representation of an
    * AlarmCondition object, as created by the toConfigXML() method.
    */
-  public static final synchronized AlarmCondition fromConfigXML(Element pElement) {
-    Class alarmConditionClass = null;
+  public static final synchronized AlarmCondition fromConfigXML(Element element) {
+    Class<?> alarmConditionClass = null;
     AlarmCondition alarmCondition = null;
 
     try {
-      alarmConditionClass = Class.forName(pElement.getAttribute("class"));
+      alarmConditionClass = Class.forName(element.getAttribute("class"));
       alarmCondition = (AlarmCondition) alarmConditionClass.newInstance();
-    } catch (ClassNotFoundException cnfe) {
-      cnfe.printStackTrace();
-      throw new RuntimeException(cnfe);
-    } catch (IllegalAccessException iae) {
-      iae.printStackTrace();
-      throw new RuntimeException(iae);
-    } catch (InstantiationException ie) {
-      ie.printStackTrace();
-      throw new RuntimeException(ie);
+    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
+      throw new RuntimeException(ex);
     }
 
-    NodeList fields = pElement.getChildNodes();
+    setFields(element, alarmConditionClass, alarmCondition);
+
+    // Return the fully configured HardwareAddress object
+    return alarmCondition;
+  }
+
+  private static void setFields(Element element, Class<?> alarmConditionClass, AlarmCondition alarmCondition) {
+    NodeList fields = element.getChildNodes();
     Node fieldNode = null;
     int fieldsCount = fields.getLength();
     String fieldName;
@@ -182,22 +190,19 @@ public abstract class AlarmCondition implements Serializable {
         fieldName = fieldNode.getNodeName();
         fieldValueString = fieldNode.getFirstChild().getNodeValue();
         try {
-
-          Field field = alarmConditionClass.getDeclaredField(decodeFieldName(fieldName));
-          String fieldTypeName = fieldNode.getAttributes().getNamedItem("type").getNodeValue();
-          field.set(alarmCondition, TypeConverter.cast(fieldValueString, fieldTypeName));
-
-        } catch (NoSuchFieldException nsfe) {
-          nsfe.printStackTrace();
-          throw new RuntimeException(nsfe);
-        } catch (IllegalAccessException iae) {
-          iae.printStackTrace();
-          throw new RuntimeException(iae);
+          Method[] methods = alarmConditionClass.getMethods();
+          String setterMethod = decodeFieldMethodSetterName(fieldName);
+          for (Method method : methods) {
+            if (method.getName().equals(setterMethod)) {
+              String fieldTypeName = fieldNode.getAttributes().getNamedItem("type").getNodeValue();
+              method.invoke(alarmCondition, TypeConverter.cast(fieldValueString, fieldTypeName));
+            }
+          }
+        } catch (Exception ex) {
+          throw new RuntimeException(ex);
         }
       }
     }
-    // Return the fully configured HardwareAddress object
-    return alarmCondition;
   }
 
   /**
@@ -230,7 +235,7 @@ public abstract class AlarmCondition implements Serializable {
    */
   private static final String decodeFieldName(final String pXmlFieldName) {
     // StringBuffer for constructing the resulting field name
-    StringBuffer str = new StringBuffer();
+    StringBuilder str = new StringBuilder();
     // Number of characters in the XML-encoded field name
     int fieldNameLength = pXmlFieldName.length();
 
@@ -243,6 +248,32 @@ public abstract class AlarmCondition implements Serializable {
         str.append(currentChar);
       }
     }
+    return str.toString();
+  }
+
+  /**
+   * Decodes a field name from XML notation (e.g. my-field-name) to a valid Java
+   * field name (e.g. myFieldName)
+   */
+  private static final String decodeFieldMethodSetterName(final String pXmlFieldName) {
+    // StringBuffer for constructing the resulting field name
+    StringBuilder str = new StringBuilder();
+    // Number of characters in the XML-encoded field name
+    int fieldNameLength = pXmlFieldName.length();
+
+    str.append("set");
+    str.append(Character.toUpperCase(pXmlFieldName.charAt(0)));
+
+    char currentChar;
+    for (int i = 1; i < fieldNameLength; i++) {
+      currentChar = pXmlFieldName.charAt(i);
+      if (currentChar == '-') {
+        str.append(Character.toUpperCase(pXmlFieldName.charAt(++i)));
+      } else {
+        str.append(currentChar);
+      }
+    }
+
     return str.toString();
   }
 
@@ -268,29 +299,4 @@ public abstract class AlarmCondition implements Serializable {
     }
     return str.toString();
   }
-
-//  public static void main(String[] args) {
-//    try {
-//      SimpleXMLParser parser = new SimpleXMLParser();
-//      AlarmCondition c = new ValueAlarmCondition(Boolean.FALSE);
-//      AlarmCondition c2 = null;
-//      System.out.println(c.toConfigXML());
-//      c2 = AlarmCondition.fromConfigXML(parser.parse(c.toConfigXML()).getDocumentElement());
-//      System.out.println(c2.toConfigXML());
-//      c = new RangeAlarmCondition(new Float(3), new Float(5));
-//      System.out.println(c.toConfigXML());
-//      c2 = AlarmCondition.fromConfigXML(parser.parse(c.toConfigXML()).getDocumentElement());
-//      System.out.println(c2.toConfigXML());
-//      c = new RangeAlarmCondition(new Float(3), null);
-//      System.out.println(c.toConfigXML());
-//      c2 = AlarmCondition.fromConfigXML(parser.parse(c.toConfigXML()).getDocumentElement());
-//      System.out.println(c2.toConfigXML());
-//    }
-//    catch (ParserConfigurationException pce) {
-//      pce.printStackTrace();
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//  }
 }
