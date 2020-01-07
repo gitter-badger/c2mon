@@ -72,6 +72,7 @@ public abstract class AlarmCondition implements Serializable {
 
   /**
    * Returns the appropriate alarm state (ACTIVE or TERMINATE) for the given tag value.
+   * @param value Usually the latest tag value for which the alarm state shall be evaluated
    * @return true, if the alarm state for the given value is evaluated to ACTIVE
    */
   public abstract boolean evaluateState(Object value);
@@ -163,8 +164,9 @@ public abstract class AlarmCondition implements Serializable {
    * Create an AlarmCondition object from its standardized XML representation.
    * @param element DOM element containing the XML representation of an
    * AlarmCondition object, as created by the toConfigXML() method.
+   * @return The deserialized object from the XML configuration element.
    */
-  public static final synchronized AlarmCondition fromConfigXML(Element element) {
+  public static final AlarmCondition fromConfigXML(Element element) {
     Class<?> alarmConditionClass = null;
     AlarmCondition alarmCondition = null;
 
@@ -185,10 +187,9 @@ public abstract class AlarmCondition implements Serializable {
    * Create an AlarmCondition object from its standardized XML representation.
    *
    * @param pXML the XML to parse as String
-   *
    * @throws RuntimeException if errors occur during parsing of XML
    */
-  public static final synchronized AlarmCondition fromConfigXML(String pXML) {
+  public static final AlarmCondition fromConfigXML(String pXML) {
     if (xmlParser == null) {
       try {
         xmlParser = new SimpleXMLParser();
