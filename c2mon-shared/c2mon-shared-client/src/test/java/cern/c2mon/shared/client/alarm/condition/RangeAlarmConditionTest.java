@@ -144,14 +144,14 @@ public class RangeAlarmConditionTest {
   }
 
   @Test
-  public void testToString() throws ParserConfigurationException {
+  public void testGetDescription() throws ParserConfigurationException {
     RangeAlarmCondition<Float> rangeAlarmCondition = new RangeAlarmCondition<>(0f, 100f);
-    assertTrue(rangeAlarmCondition.toString().contains("ACTIVE"));
-    log.trace(rangeAlarmCondition.toString());
+    assertTrue(rangeAlarmCondition.getDescription().contains("ACTIVE"));
+    log.trace(rangeAlarmCondition.getDescription());
 
     rangeAlarmCondition.setOutOfRangeAlarm(true);
-    assertTrue(rangeAlarmCondition.toString().contains("TERMINATE"));
-    log.trace(rangeAlarmCondition.toString());
+    assertTrue(rangeAlarmCondition.getDescription().contains("TERMINATE"));
+    log.trace(rangeAlarmCondition.getDescription());
   }
 
   @Test

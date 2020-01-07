@@ -16,16 +16,18 @@
  *****************************************************************************/
 package cern.c2mon.shared.client.alarm.condition;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
- * <b>NOTE: imported as-is into C2MON</b>
- *
- * <p>
  * Simple implementation of the AlarmCondition interface.
  *
  * A ValueAlarmCondition is defined for a single alarm value. If the parameter
  * passed to the evaluateState() method is equal to the defined alarm value, the
- * alarm state is supposed to be FaultState.ACTIVE; if the two values differ,
- * the alarm state is supposed to be FaultState.TERMINATE.
+ * alarm state is supposed to be ACTIVE; if the two values differ,
+ * the alarm state is supposed to be TERMINATE.
  *
  * ValueAlarmCondition is Serializable. A serialVersionUID has been defined to
  * ensure that no serialization problems occur after minor modifications to the
@@ -33,6 +35,7 @@ package cern.c2mon.shared.client.alarm.condition;
  *
  * @author Jan Stowisek
  */
+@Getter @Setter @NoArgsConstructor @EqualsAndHashCode(callSuper=false)
 public class ValueAlarmCondition extends AlarmCondition {
 
   /**
@@ -45,14 +48,6 @@ public class ValueAlarmCondition extends AlarmCondition {
 
   /** The value for which the condition is supposed to return ACTIVE */
   private Object alarmValue;
-
-  /**
-   * Default Constructor This constructor should only used when creating an
-   * AlarmCondition object from its XML representation.
-   */
-  public ValueAlarmCondition() {
-    // nothing to do
-  }
 
   /**
    * Constructor
@@ -93,47 +88,15 @@ public class ValueAlarmCondition extends AlarmCondition {
   }
 
   /**
-   * Set a new alarm value for the ValueAlarmCondition
-   *
-   * @param pAlarmValue the value for which the condition is supposed to return ACTIVE
-   */
-  public final void setAlarmValue(final Object pAlarmValue) {
-    this.alarmValue = pAlarmValue;
-  }
-
-  /**
-   * Return the condition's alarm value
-   *
-   * @return the value for which the condition is supposed to return ACTIVE
-   */
-  public final Object getAlarmValue() {
-    return this.alarmValue;
-  }
-
-  /**
    * @return a String representation of the object
    */
   @Override
-  public String toString() {
-    return this.getClass().getName() + "(alarmValue= " + getAlarmValue() + ")";
+  public String getDescription() {
+    return ACTIVE + ", if value is equals to " + getAlarmValue();
   }
 
   @Override
   public Object clone() {
     return new ValueAlarmCondition(getAlarmValue());
-  }
-
-  @Override
-  public boolean equals(final Object obj) {
-    if (obj instanceof ValueAlarmCondition) {
-      ValueAlarmCondition cond = (ValueAlarmCondition) obj;
-      if (this.alarmValue == null) {
-        return cond.alarmValue == null;
-      } else {
-        return this.alarmValue.equals(cond.alarmValue);
-      }
-    } else {
-      return false;
-    }
   }
 }

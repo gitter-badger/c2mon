@@ -16,8 +16,9 @@
  *****************************************************************************/
 package cern.c2mon.shared.client.alarm.condition;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import cern.c2mon.shared.common.type.TypeConverter;
 
@@ -44,7 +45,7 @@ import cern.c2mon.shared.common.type.TypeConverter;
  *
  * @author Jan Stowisek, Matthias Braeger
  */
-@Data @EqualsAndHashCode(callSuper=false)
+@Getter @Setter @EqualsAndHashCode(callSuper=false)
 public class RangeAlarmCondition<T extends Number & Comparable<T>> extends AlarmCondition {
 
   /**
@@ -160,10 +161,10 @@ public class RangeAlarmCondition<T extends Number & Comparable<T>> extends Alarm
    * @return a String representation of the object
    */
   @Override
-  public String toString() {
-    String alarm = "ACTIVE";
+  public String getDescription() {
+    String alarm = ACTIVE;
     if (outOfRangeAlarm) {
-      alarm = "TERMINATE";
+      alarm = TERMINATE;
     }
 
     StringBuilder str = new StringBuilder(alarm + " if the tag value is");
