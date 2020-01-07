@@ -139,8 +139,7 @@ public abstract class AlarmCondition implements Serializable {
                  .append(" type=\"");
               if (fieldClassName.indexOf("java.lang") == -1) {
                 str.append(fieldClassName);
-              }
-              else {
+              } else {
                 str.append(fieldClassName.substring(10));
               }
               str.append("\">")
@@ -189,7 +188,7 @@ public abstract class AlarmCondition implements Serializable {
    * @param pXML the XML to parse as String
    * @throws RuntimeException if errors occur during parsing of XML
    */
-  public static final AlarmCondition fromConfigXML(String pXML) {
+  public static final synchronized AlarmCondition fromConfigXML(String pXML) {
     if (xmlParser == null) {
       try {
         xmlParser = new SimpleXMLParser();
