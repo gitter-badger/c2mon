@@ -82,16 +82,27 @@ public class RangeAlarmCondition<T extends Number & Comparable<T>> extends Alarm
   }
 
   /**
-   * Constructor
+   * Constructor for creating an alarm when the value is within the given range
    *
-   * @param pMin
-   *          lower limit of the alarm range (may be null)
-   * @param pMax
-   *          upper limit of the alarm range (may be null)
+   * @param min lower limit of the alarm range (may be null)
+   * @param max upper limit of the alarm range (may be null)
    */
-  public RangeAlarmCondition(final Comparable<T> pMin, final Comparable<T> pMax) {
-    this.minValue = pMin;
-    this.maxValue = pMax;
+  public RangeAlarmCondition(final Comparable<T> min, final Comparable<T> max) {
+    this.minValue = min;
+    this.maxValue = max;
+  }
+
+  /**
+   * All args Constructor
+   *
+   * @param min lower limit of the alarm range (may be null)
+   * @param max upper limit of the alarm range (may be null)
+   * @param outOfRangeAlarm If set to <code>true</code>, an Alarm is thrown when the value is out of the defined range
+   */
+  public RangeAlarmCondition(final Comparable<T> min, final Comparable<T> max, boolean outOfRangeAlarm) {
+    this.minValue = min;
+    this.maxValue = max;
+    this.outOfRangeAlarm = outOfRangeAlarm;
   }
 
   /**
