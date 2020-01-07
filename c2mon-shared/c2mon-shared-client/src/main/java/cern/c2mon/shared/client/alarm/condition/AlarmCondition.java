@@ -51,9 +51,6 @@ import cern.c2mon.shared.util.parser.SimpleXMLParser;
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public abstract class AlarmCondition implements Serializable {
 
-  /** Serial version UID */
-  private static final long serialVersionUID = 963875467077605494L;
-
   /**
    * The active fault state descriptor.
    */
@@ -64,15 +61,18 @@ public abstract class AlarmCondition implements Serializable {
    */
   public static final String TERMINATE = "TERMINATE";
 
-  private static SimpleXMLParser xmlParser = null;
+  /** Serial version UID */
+  private static final long serialVersionUID = 963875467077605494L;
+
+  private static final Object LOCK = new Object();
 
   private static final String EMPTY_STRING = "";
 
+  private static SimpleXMLParser xmlParser;
 
   /**
-   * Returns the appropriate alarm state (i.e. the fault state descriptor
-   * in LASER) for the given tag value.
-   * The only allowed return values are FaultState.TERMINATE or FaultState.ACTIVE.
+   * Returns the appropriate alarm state (ACTIVE or TERMINATE) for the given tag value.
+   * @return true, if the alarm state for the given value is evaluated to ACTIVE
    */
   public abstract boolean evaluateState(Object value);
 
@@ -99,18 +99,18 @@ public abstract class AlarmCondition implements Serializable {
   }
 
   /**
-   * Returns a standardised XML representation of the AlarmCondition object.
+   * @return A standardised XML representation of the AlarmCondition object.
    *
    * @throws RuntimeException if errors occur during encoding to XML
    */
-  public final synchronized String toConfigXML() {
+  public final String toConfigXML() {
     // The concrete subclass of AlarmCondition
     Class<?> conditionClass = this.getClass();
     // The declared fields of this subclass
     Field[] fields = getAllFields(conditionClass);
 
     // Temporary variable for constructing the XML string
-    StringBuilder str = new StringBuilder();
+    StringBuilder str = new StringBuilder(100);
     // Temporary variable for storing the XML name of a field
     String fieldXMLName = null;
     // Temporary variable for storing the class name of a field's value
@@ -119,36 +119,38 @@ public abstract class AlarmCondition implements Serializable {
     Object fieldVal = null;
 
     /* Open the <AlarmCondition> tag */
-    str.append("<AlarmCondition class=\"");
-    str.append(conditionClass.getName());
-    str.append("\">\n");
+    str.append("<AlarmCondition class=\"")
+       .append(conditionClass.getName())
+       .append("\">\n");
 
-    for (Field field : fields) {
-      if (!Modifier.isFinal(field.getModifiers())) {
-        try {
-          field.setAccessible(true);
-          fieldVal = field.get(this);
-          if (fieldVal != null) {
-            fieldClassName = fieldVal.getClass().getName();
-            fieldXMLName = encodeFieldName(field.getName());
+    synchronized(LOCK) {
+      for (Field field : fields) {
+        if (!Modifier.isFinal(field.getModifiers())) {
+          try {
+            field.setAccessible(true);
+            fieldVal = field.get(this);
+            if (fieldVal != null) {
+              fieldClassName = fieldVal.getClass().getName();
+              fieldXMLName = encodeFieldName(field.getName());
 
-            str.append("  <");
-            str.append(fieldXMLName);
-            str.append(" type=\"");
-            if (fieldClassName.indexOf("java.lang") == -1) {
-              str.append(fieldClassName);
+              str.append("  <")
+                 .append(fieldXMLName)
+                 .append(" type=\"");
+              if (fieldClassName.indexOf("java.lang") == -1) {
+                str.append(fieldClassName);
+              }
+              else {
+                str.append(fieldClassName.substring(10));
+              }
+              str.append("\">")
+                 .append(fieldVal)
+                 .append("</")
+                 .append(fieldXMLName)
+                 .append(">\n");
             }
-            else {
-              str.append(fieldClassName.substring(10));
-            }
-            str.append("\">");
-            str.append(fieldVal);
-            str.append("</");
-            str.append(fieldXMLName);
-            str.append(">\n");
+          } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
           }
-        } catch (IllegalAccessException iae) {
-          throw new RuntimeException(iae);
         }
       }
     }
@@ -177,6 +179,24 @@ public abstract class AlarmCondition implements Serializable {
 
     // Return the fully configured HardwareAddress object
     return alarmCondition;
+  }
+
+  /**
+   * Create an AlarmCondition object from its standardized XML representation.
+   *
+   * @param pXML the XML to parse as String
+   *
+   * @throws RuntimeException if errors occur during parsing of XML
+   */
+  public static final synchronized AlarmCondition fromConfigXML(String pXML) {
+    if (xmlParser == null) {
+      try {
+        xmlParser = new SimpleXMLParser();
+      } catch (ParserConfigurationException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return fromConfigXML(xmlParser.parse(pXML).getDocumentElement());
   }
 
   private static Field[] getAllFields(Class<?> conditionClass) {
@@ -232,30 +252,6 @@ public abstract class AlarmCondition implements Serializable {
   }
 
   /**
-   * Create an AlarmCondition object from its standardized XML representation.
-   *
-   * @param pElement DOM element containing the XML representation of an
-   * AlarmCondition object, as created by the toConfigXML() method.
-   *
-   * @throws RuntimeException if errors occur during parsing of XML
-   */
-  public static final synchronized AlarmCondition fromConfigXML(String pXML) {
-    if (xmlParser == null) {
-      try {
-        xmlParser = new SimpleXMLParser();
-      } catch (ParserConfigurationException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return fromConfigXML(xmlParser.parse(pXML).getDocumentElement());
-  }
-
-
-  //----------------------------------------------------------------------------
-  // Private utility methods
-  //----------------------------------------------------------------------------
-
-  /**
    * Decodes a field name from XML notation (e.g. my-field-name) to a valid Java
    * field name (e.g. myFieldName)
    */
@@ -283,7 +279,7 @@ public abstract class AlarmCondition implements Serializable {
    */
   private final String encodeFieldName(final String pFieldName) {
     // StringBuffer for constructing the resulting XML-encoded field name
-    StringBuffer str = new StringBuffer();
+    StringBuilder str = new StringBuilder();
     // Number of characters in the field name
     int fieldNameLength = pFieldName.length();
 
@@ -291,8 +287,8 @@ public abstract class AlarmCondition implements Serializable {
     for (int i= 0; i != fieldNameLength; i++) {
       currentChar =  pFieldName.charAt(i);
       if (Character.isUpperCase(currentChar)) {
-        str.append('-');
-        str.append(Character.toLowerCase(currentChar));
+        str.append('-')
+           .append(Character.toLowerCase(currentChar));
       } else {
         str.append(currentChar);
       }
