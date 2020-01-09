@@ -21,8 +21,6 @@ import cern.c2mon.server.common.alarm.Alarm;
 import cern.c2mon.server.elasticsearch.util.EntityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.internal.util.reflection.Whitebox;
 
 import java.sql.Timestamp;
@@ -40,7 +38,6 @@ import static junit.framework.TestCase.assertEquals;
  * @author Justin Lewis Salmon
  */
 @Slf4j
-@RunWith(JUnit4.class)
 public class AlarmDocumentConverterTestSuite {
 
   private static final String TIMESTAMP_PROPERTY = "timestamp";
