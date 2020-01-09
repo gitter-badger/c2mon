@@ -30,7 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
 import cern.c2mon.server.common.datatag.DataTagCacheObject;
 import cern.c2mon.server.elasticsearch.ElasticsearchSuiteTest;
 import cern.c2mon.server.elasticsearch.ElasticsearchTestDefinition;
-import cern.c2mon.server.elasticsearch.IndexManager;
 import cern.c2mon.server.elasticsearch.IndexNameManager;
 import cern.c2mon.server.test.CachePopulationRule;
 import cern.c2mon.server.elasticsearch.util.EmbeddedElasticsearchManager;
@@ -55,9 +54,6 @@ public class TagConfigDocumentIndexerTestSuite extends ElasticsearchTestDefiniti
 
   @Autowired
   private IndexNameManager indexNameManager;
-
-  @Autowired
-  private IndexManager indexManager;
 
   @Autowired
   private TagConfigDocumentIndexer indexer;
