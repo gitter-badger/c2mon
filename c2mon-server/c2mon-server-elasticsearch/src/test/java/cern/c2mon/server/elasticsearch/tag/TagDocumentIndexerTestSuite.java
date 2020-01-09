@@ -34,6 +34,7 @@ import cern.c2mon.server.test.CachePopulationRule;
 import cern.c2mon.server.elasticsearch.util.EmbeddedElasticsearchManager;
 import cern.c2mon.server.elasticsearch.util.EntityUtils;
 import cern.c2mon.server.elasticsearch.util.IndexUtils;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,6 +49,7 @@ import static org.junit.Assert.assertTrue;
  * @author Justin Lewis Salmon
  * @authro Serhiy Boychenko
  */
+@ContextConfiguration(classes = CachePopulationRule.class)
 public class TagDocumentIndexerTestSuite extends ElasticsearchTestDefinition {
 
   @Autowired
