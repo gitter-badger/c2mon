@@ -18,9 +18,8 @@ package cern.c2mon.shared.common.type;
 
 import java.util.Random;
 
+import cern.c2mon.shared.common.supervision.SupervisionStatus;
 import org.junit.Test;
-
-import cern.c2mon.shared.common.supervision.SupervisionConstants.SupervisionStatus;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
