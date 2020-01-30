@@ -17,6 +17,8 @@
 package cern.c2mon.shared.client.alarm.condition;
 
 
+import cern.c2mon.shared.common.type.TypeConverter;
+import cern.c2mon.shared.util.parser.SimpleXMLParser;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -31,9 +33,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import cern.c2mon.shared.common.type.TypeConverter;
-import cern.c2mon.shared.util.parser.SimpleXMLParser;
 
 
 /**
@@ -140,7 +139,7 @@ public abstract class AlarmCondition implements Serializable {
               str.append("  <")
                  .append(fieldXMLName)
                  .append(" type=\"");
-              if (fieldClassName.indexOf("java.lang") == -1) {
+              if (!fieldClassName.contains("java.lang")) {
                 str.append(fieldClassName);
               } else {
                 str.append(fieldClassName.substring(10));
@@ -168,7 +167,7 @@ public abstract class AlarmCondition implements Serializable {
    * AlarmCondition object, as created by the toConfigXML() method.
    * @return The deserialized object from the XML configuration element.
    */
-  public static final AlarmCondition fromConfigXML(Element element) {
+  public static AlarmCondition fromConfigXML(Element element) {
     Class<?> alarmConditionClass = null;
     AlarmCondition alarmCondition = null;
 
@@ -191,7 +190,7 @@ public abstract class AlarmCondition implements Serializable {
    * @param pXML the XML to parse as String
    * @throws RuntimeException if errors occur during parsing of XML
    */
-  public static final synchronized AlarmCondition fromConfigXML(String pXML) {
+  public static synchronized AlarmCondition fromConfigXML(String pXML) {
     if (xmlParser == null) {
       try {
         xmlParser = new SimpleXMLParser();
@@ -258,7 +257,7 @@ public abstract class AlarmCondition implements Serializable {
    * Decodes a field name from XML notation (e.g. my-field-name) to a valid Java
    * field name (e.g. myFieldName)
    */
-  private static final String decodeFieldName(final String pXmlFieldName) {
+  private static String decodeFieldName(final String pXmlFieldName) {
     // StringBuffer for constructing the resulting field name
     StringBuilder str = new StringBuilder();
     // Number of characters in the XML-encoded field name
@@ -280,7 +279,7 @@ public abstract class AlarmCondition implements Serializable {
    * Encodes a field name in Java notation (e.g. myFieldName) to an XML
    * field name (e.g. my-field-name).
    */
-  private final String encodeFieldName(final String pFieldName) {
+  private String encodeFieldName(final String pFieldName) {
     // StringBuffer for constructing the resulting XML-encoded field name
     StringBuilder str = new StringBuilder();
     // Number of characters in the field name
