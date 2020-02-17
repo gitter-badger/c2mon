@@ -14,7 +14,6 @@ variables:
     -Dorg.slf4j.simpleLogger.showDateTime=true
     -Djava.awt.headless=true
     --batch-mode --errors --fail-at-end --show-version --settings $CI_PROJECT_DIR/settings.xml
-    -Dconfig.vues.npm.git.remote.skip=false
     --threads 2C
 
 # Will be used by other branches
