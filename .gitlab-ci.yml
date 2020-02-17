@@ -30,7 +30,7 @@ image:
   script:
     - export MAVEN_OPTS=""
     - cd $TARGET
-    - mvn $MAVEN_CLI_OPTS -DskipTests package
+    - mvn $MAVEN_CLI_OPTS -DskipTests install
   artifacts:
     name: "$TARGET#$CI_COMMIT_REF_NAME"
     when: on_success
