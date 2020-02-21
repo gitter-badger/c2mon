@@ -4,7 +4,8 @@ stages:
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
   MAVEN_CLI_OPTS:
-    --errors --fail-at-end
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    --batch-mode --errors --fail-at-end --show-version --settings $CI_PROJECT_DIR/settings.xml
 
 # Will be used by other branches
 cache:
