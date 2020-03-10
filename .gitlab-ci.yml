@@ -15,7 +15,7 @@ cache:
     - .m2
 
 image:
-  name: maven:3.6.2-jdk-11-slim
+  name: gitlab-registry.cern.ch/industrial-controls/sw-infra/cc7-maven:jdk-11-mvn-3.6-1
 
 # Preloads the local repository with cached dependencies
 build_cache:
@@ -28,4 +28,4 @@ build_cache:
     - git checkout issue-39
     # Nuke existing repo
     - rm -rf .m2 node
-    - ./mvnw $MAVEN_CLI_OPTS -Dmaven.wagon.http.ssl.insecure=true package -Dmaven.wagon.http.ssl.allowall=true org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
+    - ./mvnw $MAVEN_CLI_OPTS  -Dmaven.wagon.http.ssl.insecure=true -DskipTests package -Dmaven.wagon.http.ssl.allowall=true org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
