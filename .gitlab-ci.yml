@@ -16,6 +16,7 @@ cache:
 
 image:
   name: gitlab-registry.cern.ch/industrial-controls/sw-infra/cc7-maven:jdk-11-mvn-3.6-1
+  entrypoint: [""]
 
 # Preloads the local repository with cached dependencies
 build_cache:
