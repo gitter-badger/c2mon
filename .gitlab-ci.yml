@@ -23,9 +23,12 @@ build_cache:
   script:
     # This variable is being set at the TIM level and can affect our builds
     - export MAVEN_OPTS=""
-    - apt-get update && apt-get install git -y -q
+#    - apt-get update && apt-get install git -y -q
     # We wish to build cache for master - this branch WILL fall behind
+    - echo "Starting cache refresh" 
+    - pwd
+    - ls
     - git checkout issue-39
     # Nuke existing repo
     - rm -rf .m2 node
-    - ./mvnw $MAVEN_CLI_OPTS  -Dmaven.wagon.http.ssl.insecure=true -DskipTests package -Dmaven.wagon.http.ssl.allowall=true org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
+    - mvn $MAVEN_CLI_OPTS  -Dmaven.wagon.http.ssl.insecure=true -DskipTests package -Dmaven.wagon.http.ssl.allowall=true org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
