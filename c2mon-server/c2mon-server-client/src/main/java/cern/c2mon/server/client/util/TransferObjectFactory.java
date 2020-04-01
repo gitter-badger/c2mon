@@ -27,6 +27,7 @@ import cern.c2mon.server.common.datatag.DataTag;
 import cern.c2mon.server.common.device.Device;
 import cern.c2mon.server.common.process.Process;
 import cern.c2mon.server.common.rule.RuleTag;
+import cern.c2mon.server.common.tag.InfoTag;
 import cern.c2mon.server.common.tag.Tag;
 import cern.c2mon.shared.client.alarm.AlarmValueImpl;
 import cern.c2mon.shared.client.device.DeviceClassNameResponse;
@@ -150,7 +151,7 @@ public abstract class TransferObjectFactory {
               .faultFamily(alarm.getFaultFamily())
               .info(alarm.getInfo())
               .tagId(alarm.getTagId())
-              .timestamp(alarm.getTimestamp())
+              .timestamp(alarm.getTriggerTimestamp())
               .active(alarm.isActive())
               .oscillating(alarm.isOscillating())
               .sourceTimestamp(alarm.getSourceTimestamp()).build();
@@ -192,15 +193,28 @@ public abstract class TransferObjectFactory {
     if (tag != null) {
 
       tagConfig = new TagConfigImpl(tag.getId());
-      tagConfig.setAlarmIds(new ArrayList<Long>(tag.getAlarmIds()));
+      tagConfig.setAlarmIds(new ArrayList<>(tag.getAlarmIds()));
 
-      Boolean controlTag = Boolean.FALSE;
-      if (tag instanceof ControlTag) {
-        controlTag = Boolean.TRUE;
+      tagConfig.setControlTag(tag instanceof ControlTag);
+
+      if (tag instanceof InfoTag) {
+        InfoTag infoTag = (InfoTag) tag;
+
+        if (infoTag.getAddress() != null) {
+
+          tagConfig.setValueDeadbandType(infoTag.getAddress().getValueDeadbandType());
+          tagConfig.setValueDeadband(infoTag.getAddress().getValueDeadband());
+          tagConfig.setTimeDeadband(infoTag.getAddress().getTimeDeadband());
+          tagConfig.setGuaranteedDelivery(infoTag.getAddress().isGuaranteedDelivery());
+          tagConfig.setPriority(infoTag.getAddress().getPriority());
+          tagConfig.setAddressParameters(infoTag.getAddress().getAddressParameters());
+          if(infoTag.getAddress().getHardwareAddress() != null){
+            tagConfig.setHardwareAddress(infoTag.getAddress().getHardwareAddress().toConfigXML());
+          }
+        }
       }
-      tagConfig.setControlTag(controlTag);
 
-      if (tag instanceof DataTag || tag instanceof ControlTag) {
+      if (tag instanceof DataTag) {
         DataTag dataTag = (DataTag) tag;
 
         // check if min. value is defined, since it is not mandatory
@@ -291,11 +305,11 @@ public abstract class TransferObjectFactory {
                 .faultFamily(alarm.getFaultFamily())
                 .info(alarm.getInfo())
                 .tagId(alarm.getTagId())
-                .timestamp(alarm.getTimestamp())
+                .timestamp(alarm.getTriggerTimestamp())
                 .active(alarm.isActive())
                 .oscillating(alarm.isOscillating())
-                .sourceTimestamp(alarm.getSourceTimestamp()).build();    
-                
+                .sourceTimestamp(alarm.getSourceTimestamp()).build();
+
         if (alarm.getMetadata()!= null){
           alarmValue.setMetadata(alarm.getMetadata().getMetadata());
         }
