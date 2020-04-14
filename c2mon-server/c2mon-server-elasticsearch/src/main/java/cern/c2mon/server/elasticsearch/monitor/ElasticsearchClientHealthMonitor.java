@@ -43,6 +43,7 @@ public class ElasticsearchClientHealthMonitor {
   /**
    * Constructs ES client health monitor
    *
+   * @param properties of Elasticsearch instance
    * @param client to be monitored
    */
   @Autowired
