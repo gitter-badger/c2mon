@@ -48,6 +48,8 @@ public class TagConfigDocumentIndexer {
   private final TagConfigDocumentConverter converter;
 
   /**
+   * Tag configuration document constructor
+   *
    * @param properties   of Elasticsearch server the application is communicating with.
    * @param indexManager to perform index-related operations.
    * @param tagFacadeGateway to locate correct facade bean for re-index operation
