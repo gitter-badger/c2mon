@@ -35,36 +35,44 @@ import cern.c2mon.server.common.rule.RuleTag;
 import cern.c2mon.server.common.rule.RuleTagCacheObject;
 import cern.c2mon.server.common.subequipment.SubEquipment;
 import cern.c2mon.server.common.subequipment.SubEquipmentCacheObject;
+import cern.c2mon.server.common.supervision.SupervisionStateTag;
+import cern.c2mon.server.common.tag.Tag;
 import cern.c2mon.server.supervision.config.SupervisionModule;
 import cern.c2mon.shared.client.supervision.SupervisionEvent;
 import cern.c2mon.shared.client.supervision.SupervisionEventImpl;
 import cern.c2mon.shared.common.CacheEvent;
 import cern.c2mon.shared.common.Cacheable;
+import cern.c2mon.shared.common.datatag.DataTagQuality;
+import cern.c2mon.shared.common.datatag.DataTagQualityImpl;
 import cern.c2mon.shared.common.supervision.SupervisionEntity;
 import cern.c2mon.shared.common.supervision.SupervisionStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static cern.c2mon.server.common.util.Java9Collections.listOf;
 import static cern.c2mon.server.common.util.Java9Collections.setOf;
 import static cern.c2mon.server.common.util.KotlinAPIs.apply;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toSet;
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test of SupervisionTagNotifier class.
  *
  * @author Mark Brightwell
  */
-@ActiveProfiles("cache-spies")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {
   CommonModule.class,
@@ -87,15 +95,18 @@ public class SupervisionTagNotifierTest {
   @Inject private C2monCache<SubEquipment> subEquipmentCache;
   @Inject private C2monCache<DataTag> dataTagCache;
   @Inject private C2monCache<RuleTag> ruleTagCache;
+  @Inject private C2monCache<SupervisionStateTag> stateTagCache;
 
   private ProcessCacheObject process;
   private EquipmentCacheObject equipment;
   private SubEquipmentCacheObject subEquipment;
-  private DataTagCacheObject dataTag;
+
+  private DataTagCacheObject dataTag1;
   private DataTagCacheObject dataTag2;
   private DataTagCacheObject dataTag3;
   private DataTagCacheObject dataTag4;
-  private RuleTagCacheObject ruleTag;
+
+  private RuleTagCacheObject ruleTag1;
   private RuleTagCacheObject ruleTag2;
   private RuleTagCacheObject ruleTag3;
   private RuleTagCacheObject ruleTag4;
@@ -105,81 +116,96 @@ public class SupervisionTagNotifierTest {
   public void setUp() {
     equipment = (EquipmentCacheObject) putAndGet(
       equipmentCache,
-      apply(new EquipmentCacheObject(30L), e -> {})
+      apply(new EquipmentCacheObject(30L), e -> {
+        SupervisionStateTag stateTag = createStateTag(30_000L, SupervisionEntity.EQUIPMENT, e);
+        e.setStateTagId(stateTag.getId());
+      })
     );
 
     subEquipment = (SubEquipmentCacheObject) putAndGet(
       subEquipmentCache,
       apply(new SubEquipmentCacheObject(50L), se -> {
         se.setParentId(equipment.getId());
+
+        SupervisionStateTag stateTag = createStateTag(50_000L, SupervisionEntity.SUBEQUIPMENT, se);
+        se.setStateTagId(stateTag.getId());
       })
     );
 
     process = (ProcessCacheObject) putAndGet(
       processCache,
       apply(new ProcessCacheObject(10L), p -> {
-        p.setStateTagId(100L); // FIXME?
-        p.setEquipmentIds(new ArrayList<>(singletonList(equipment.getId())));
+        p.setEquipmentIds(new ArrayList<>(listOf(equipment.getId())));
+
+        SupervisionStateTag stateTag = createStateTag(10_000L, SupervisionEntity.SUBEQUIPMENT, p);
+        p.setStateTagId(stateTag.getId());
       })
     );
 
-    ruleTag = (RuleTagCacheObject) putAndGet(
+    ruleTag1 = (RuleTagCacheObject) putAndGet(
       ruleTagCache,
-      apply(new RuleTagCacheObject(200L), r -> {
-        r.setEquipmentIds(setOf(equipment.getId()));
-        r.setProcessIds(setOf(process.getId()));
+      apply(new RuleTagCacheObject(200L), t -> {
+        t.setEquipmentIds(setOf(equipment.getId()));
+        t.setProcessIds(setOf(process.getId()));
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
     ruleTag2 = (RuleTagCacheObject) putAndGet(
       ruleTagCache,
-      apply(new RuleTagCacheObject(201L), r -> {
-        r.setEquipmentIds(setOf(equipment.getId()));
-        r.setProcessIds(setOf(process.getId()));
+      apply(new RuleTagCacheObject(201L), t -> {
+        t.setEquipmentIds(setOf(equipment.getId()));
+        t.setProcessIds(setOf(process.getId()));
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
     ruleTag3 = (RuleTagCacheObject) putAndGet(
       ruleTagCache,
-      apply(new RuleTagCacheObject(202L), r -> {
-        r.setEquipmentIds(setOf(equipment.getId()));
-        r.setProcessIds(setOf(process.getId()));
+      apply(new RuleTagCacheObject(202L), t -> {
+        t.setEquipmentIds(setOf(equipment.getId()));
+        t.setProcessIds(setOf(process.getId()));
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
     ruleTag4 = (RuleTagCacheObject) putAndGet(
       ruleTagCache,
-      apply(new RuleTagCacheObject(203L), r -> {
-        r.setSubEquipmentIds(setOf(subEquipment.getId()));
-        r.setEquipmentIds(setOf(equipment.getId()));
-        r.setProcessIds(setOf(process.getId()));
+      apply(new RuleTagCacheObject(203L), t -> {
+        t.setSubEquipmentIds(setOf(subEquipment.getId()));
+        t.setEquipmentIds(setOf(equipment.getId()));
+        t.setProcessIds(setOf(process.getId()));
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
     ruleTag5 = (RuleTagCacheObject) putAndGet(
       ruleTagCache,
-      apply(new RuleTagCacheObject(204L), r -> {
-        r.setSubEquipmentIds(setOf(subEquipment.getId()));
-        r.setEquipmentIds(setOf(equipment.getId()));
-        r.setProcessIds(setOf(process.getId()));
+      apply(new RuleTagCacheObject(204L), t -> {
+        t.setSubEquipmentIds(setOf(subEquipment.getId()));
+        t.setEquipmentIds(setOf(equipment.getId()));
+        t.setProcessIds(setOf(process.getId()));
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
-    dataTag = (DataTagCacheObject) putAndGet(
+    dataTag1 = (DataTagCacheObject) putAndGet(
       dataTagCache,
       apply(new DataTagCacheObject(100L), t -> {
-        t.setRuleIds(asList(ruleTag.getId(), ruleTag2.getId()));
+        t.setRuleIds(listOf(ruleTag1.getId(), ruleTag2.getId()));
         t.setEquipmentId(equipment.getId());
         t.setProcessId(process.getId());
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
     dataTag2 = (DataTagCacheObject) putAndGet(
       dataTagCache,
       apply(new DataTagCacheObject(101L), t -> {
-        t.setRuleIds(asList(ruleTag.getId(), ruleTag3.getId()));
+        t.setRuleIds(asList(ruleTag1.getId(), ruleTag3.getId()));
         t.setEquipmentId(equipment.getId());
         t.setProcessId(process.getId());
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
@@ -190,6 +216,7 @@ public class SupervisionTagNotifierTest {
         t.setSubEquipmentId(subEquipment.getId());
         t.setEquipmentId(equipment.getId());
         t.setProcessId(process.getId());
+        t.setDataTagQuality(createValidQuality());
       })
     );
 
@@ -200,128 +227,104 @@ public class SupervisionTagNotifierTest {
         t.setSubEquipmentId(subEquipment.getId());
         t.setEquipmentId(equipment.getId());
         t.setProcessId(process.getId());
+        t.setDataTagQuality(createValidQuality());
       })
     );
   }
 
   @Test
-  public void testInitialization() {
-    supervisionTagNotifier.init();
-  }
-
-  @Test
-  @DirtiesContext
   public void testNotifySupervisionEventForProcessEvent() {
-    SupervisionEvent event = new SupervisionEventImpl(
-      SupervisionEntity.PROCESS,
-      process.getId(),
-      "P_TEST",
-      SupervisionStatus.DOWN,
-      new Timestamp(System.currentTimeMillis()),
-      "test message"
+    testEventNotification(
+      new SupervisionEventImpl(
+        SupervisionEntity.PROCESS,
+        process.getId(),
+        "P_TEST",
+        SupervisionStatus.DOWN,
+        new Timestamp(System.currentTimeMillis()),
+        "test message"
+      ),
+      setOf(
+        dataTag1, dataTag2, dataTag3, dataTag4,
+        ruleTag1, ruleTag2, ruleTag3, ruleTag4, ruleTag5
+      )
     );
-
-    // expect(processCache.get(10L)).andReturn(process);
-    // expect(equipmentFacade.getProcessForAbstractEquipment(30L)).andReturn(process);
-    // expect(equipmentFacade.getDataTagIds(30L)).andReturn(asList(100L, 101L));
-    // expect(tagLocationService.get(100L)).andReturn(dataTag);
-    // expect(tagLocationService.get(101L)).andReturn(dataTag2);
-    // expect(tagLocationService.get(200L)).andReturn(ruleTag).times(2);
-    // expect(tagLocationService.get(201L)).andReturn(ruleTag2);
-    // expect(tagLocationService.get(202L)).andReturn(ruleTag3);
-
-    supervisionAppender.addSupervisionQuality(dataTag, event);
-    dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, dataTag);
-    supervisionAppender.addSupervisionQuality(dataTag2, event);
-    dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, dataTag2);
-    supervisionAppender.addSupervisionQuality(ruleTag, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag); //only once although uses triggered by 2 different tags
-    supervisionAppender.addSupervisionQuality(ruleTag2, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag2);
-    supervisionAppender.addSupervisionQuality(ruleTag3, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag3);
-
-    // mockControl.replay();
-
-    supervisionTagNotifier.notifySupervisionEvent(event);
-
-    // verify(processCache).get(process.getId());
-
-    // mockControl.verify();
   }
 
   @Test
-  @DirtiesContext
   public void testNotifySupervisionEventForEquipmentEvent() {
-    SupervisionEvent event = new SupervisionEventImpl(
-      SupervisionEntity.EQUIPMENT,
-      equipment.getId(),
-      "E_TEST",
-      SupervisionStatus.RUNNING,
-      new Timestamp(System.currentTimeMillis()),
-      "test message"
+    testEventNotification(
+      new SupervisionEventImpl(
+        SupervisionEntity.EQUIPMENT,
+        equipment.getId(),
+        "E_TEST",
+        SupervisionStatus.RUNNING,
+        new Timestamp(System.currentTimeMillis()),
+        "test message"
+      ),
+      setOf(
+        dataTag1, dataTag2, dataTag3, dataTag4,
+        ruleTag1, ruleTag2, ruleTag3, ruleTag4, ruleTag5
+      )
     );
-
-    // mockControl.reset();
-
-    // expect(equipmentFacade.getProcessForAbstractEquipment(30L)).andReturn(process);
-    // expect(equipmentFacade.getDataTagIds(30L)).andReturn(asList(100L, 101L));
-    // expect(tagLocationService.get(100L)).andReturn(dataTag);
-    // expect(tagLocationService.get(101L)).andReturn(dataTag2);
-    // expect(tagLocationService.get(200L)).andReturn(ruleTag).times(2);
-    // expect(tagLocationService.get(201L)).andReturn(ruleTag2);
-    // expect(tagLocationService.get(202L)).andReturn(ruleTag3);
-
-    supervisionAppender.addSupervisionQuality(dataTag, event);
-    dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, dataTag);
-    supervisionAppender.addSupervisionQuality(dataTag2, event);
-    dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, dataTag2);
-    supervisionAppender.addSupervisionQuality(ruleTag, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag); //only once although uses triggered by 2 different tags
-    supervisionAppender.addSupervisionQuality(ruleTag2, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag2);
-    supervisionAppender.addSupervisionQuality(ruleTag3, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag3);
-
-    // mockControl.replay();
-
-    supervisionTagNotifier.notifySupervisionEvent(event);
-
-    // mockControl.verify();
   }
 
   @Test
-  @DirtiesContext
   public void testNotifySubEquipmentEvent() {
-    SupervisionEvent event = new SupervisionEventImpl(SupervisionEntity.SUBEQUIPMENT, 50L, "E_SUBTEST", SupervisionStatus.DOWN, new Timestamp(System.currentTimeMillis()),
-      "test message");
+    testEventNotification(
+      new SupervisionEventImpl(
+        SupervisionEntity.SUBEQUIPMENT,
+        subEquipment.getId(),
+        "E_SUBTEST",
+        SupervisionStatus.DOWN,
+        new Timestamp(System.currentTimeMillis()),
+        "test message"
+      ),
+      setOf(
+        dataTag3, dataTag4,
+        ruleTag4, ruleTag5
+      )
+    );
+  }
 
-    // mockControl.reset();
+  private void testEventNotification(SupervisionEvent event, Set<Tag> expectedTags) {
+    assertTrue(expectedTags.stream().allMatch(Tag::isValid));
 
-    // expect(subEquipmentFacade.getDataTagIds(50L)).andReturn(asList(102L, 103L));
-    // expect(tagLocationService.get(102L)).andReturn(dataTag3);
-    // expect(tagLocationService.get(103L)).andReturn(dataTag4);
-    // expect(tagLocationService.get(203L)).andReturn(ruleTag4).times(2);
-    // expect(tagLocationService.get(204L)).andReturn(ruleTag5).times(2);
+    List<Tag> notifiedTags = new ArrayList<>();
 
-    supervisionAppender.addSupervisionQuality(dataTag3, event);
-    dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, dataTag3);
-    supervisionAppender.addSupervisionQuality(dataTag4, event);
-    dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, dataTag4);
-    supervisionAppender.addSupervisionQuality(ruleTag4, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag4);
-    supervisionAppender.addSupervisionQuality(ruleTag5, event);
-    ruleTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, ruleTag5);
-
-    // mockControl.replay();
+    dataTagCache.getCacheListenerManager().registerListener(notifiedTags::add, CacheEvent.SUPERVISION_CHANGE);
+    ruleTagCache.getCacheListenerManager().registerListener(notifiedTags::add, CacheEvent.SUPERVISION_CHANGE);
 
     supervisionTagNotifier.notifySupervisionEvent(event);
 
-    // mockControl.verify();
+    await()
+      .atMost(250, TimeUnit.MILLISECONDS)
+      .until(() -> notifiedTags.size() == expectedTags.size());
+
+    assertEquals(
+      notifiedTags.stream().map(Tag::getId).collect(toSet()),
+      expectedTags.stream().map(Tag::getId).collect(toSet())
+    );
+    assertTrue(notifiedTags.stream().noneMatch(Tag::isValid));
+  }
+
+  private <S extends Cacheable> SupervisionStateTag createStateTag(Long tagId, SupervisionEntity supervisedEntity, S supervisedObject) {
+    return putAndGet(
+      stateTagCache,
+      apply(new SupervisionStateTag(tagId), t -> {
+        t.setSupervisedEntity(supervisedEntity);
+        t.setSupervisedId(supervisedObject.getId());
+      })
+    );
   }
 
   private static <C extends C2monCache<T>, T extends Cacheable> T putAndGet(C cache, T thing) {
     cache.put(thing.getId(), thing);
     return cache.get(thing.getId());
+  }
+
+  private static DataTagQuality createValidQuality() {
+    DataTagQuality dataTagQuality = new DataTagQualityImpl();
+    dataTagQuality.validate();
+    return dataTagQuality;
   }
 }
