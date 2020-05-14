@@ -32,6 +32,7 @@ import cern.c2mon.server.common.equipment.Equipment;
 import cern.c2mon.server.common.process.Process;
 import cern.c2mon.server.common.rule.RuleTag;
 import cern.c2mon.server.common.subequipment.SubEquipment;
+import cern.c2mon.server.common.supervision.Supervised;
 import cern.c2mon.server.common.tag.Tag;
 import cern.c2mon.server.supervision.SupervisionListener;
 import cern.c2mon.server.supervision.SupervisionNotifier;
@@ -46,7 +47,12 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 
 /**
  * On supervision status changes, calls listeners of all C2monCacheWithSupervision
@@ -118,9 +124,6 @@ public class SupervisionTagNotifier implements SupervisionListener, SmartLifecyc
    *
    * <p>All elements are shared through the cluster
    */
-
-  /** Cluster cache key lock */
-  protected static final String EVENT_LOCK = "c2mon.supervision.SupervisionTagNotifier.eventLock";
 
   /**
    * For lifecycle callback to stop listener threads.
@@ -250,35 +253,24 @@ public class SupervisionTagNotifier implements SupervisionListener, SmartLifecyc
   private void callCacheNotification(final Long id, final Set<Long> notifiedRules) {
     synchronized (notifiedRules) {
       Tag tagCopy = unifiedTagCacheFacade.get(id);
+
       if (!notifiedRules.contains(tagCopy.getId())) {
         log.trace("Performing supervision notification for tag " + id);
-        boolean dirtyTagContext = false;
 
-        for (Long procId : tagCopy.getProcessIds()) {
-          if (processCache.containsKey(procId)) { //null never override a value, so if statement ok out of lock
-            supervisionAppender.addSupervisionQuality(tagCopy,
-              stateTagService.getSupervisionEvent(processCache.get(procId).getStateTagId()));
-            dirtyTagContext = true;
-          }
-        }
+        List<Long> stateTagIds = Stream.of(
+          tagCopy.getProcessIds().stream().filter(processCache::containsKey).map(processCache::get),
+          tagCopy.getEquipmentIds().stream().filter(equipmentCache::containsKey).map(equipmentCache::get),
+          tagCopy.getSubEquipmentIds().stream().filter(subEquipmentCache::containsKey).map(subEquipmentCache::get)
+        )
+        .flatMap(identity())
+        .map(Supervised::getStateTagId)
+        .collect(toList());
 
-        for (Long eqId : tagCopy.getEquipmentIds()) {
-          if (equipmentCache.containsKey(eqId)) {
-            supervisionAppender.addSupervisionQuality(tagCopy,
-              stateTagService.getSupervisionEvent(equipmentCache.get(eqId).getStateTagId()));
-            dirtyTagContext = true;
-          }
-        }
+        stateTagIds.forEach(stateTagId ->
+          supervisionAppender.addSupervisionQuality(tagCopy, stateTagService.getSupervisionEvent(stateTagId))
+        );
 
-        for (Long subEqId : tagCopy.getSubEquipmentIds()) {
-          if (subEquipmentCache.containsKey(subEqId)) {
-            supervisionAppender.addSupervisionQuality(tagCopy,
-              stateTagService.getSupervisionEvent(subEquipmentCache.get(subEqId).getStateTagId()));
-            dirtyTagContext = true;
-          }
-        }
-
-        if (dirtyTagContext) {
+        if (!stateTagIds.isEmpty()) {
           if (tagCopy instanceof DataTag) {
             dataTagCache.getCacheListenerManager().notifyListenersOf(CacheEvent.SUPERVISION_CHANGE, (DataTag) tagCopy);
           } else if (tagCopy instanceof RuleTag) {
