@@ -57,7 +57,7 @@ public class CacheDataSourceConfig {
   }
 
   @Bean
-  public static SqlSessionFactoryBean cacheSqlSessionFactory(DataSource cacheDataSource) throws Exception {
+  public static SqlSessionFactoryBean cacheSqlSessionFactory(DataSource cacheDataSource) {
     SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
     sessionFactory.setDataSource(cacheDataSource);
     sessionFactory.setDatabaseIdProvider(databaseIdProvider());
