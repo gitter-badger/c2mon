@@ -31,20 +31,20 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import cern.c2mon.server.cache.alarm.AlarmAggregatorRegistration;
 import cern.c2mon.server.cache.alarm.AlarmAggregatorListener;
+import cern.c2mon.server.cache.alarm.AlarmAggregatorRegistration;
 import cern.c2mon.server.client.config.ClientProperties;
 import cern.c2mon.server.client.util.TransferObjectFactory;
 import cern.c2mon.server.common.alarm.Alarm;
 import cern.c2mon.server.common.alarm.TagWithAlarms;
 import cern.c2mon.server.common.alarm.TagWithAlarmsImpl;
 import cern.c2mon.server.common.config.ServerConstants;
-import cern.c2mon.server.common.republisher.Publisher;
-import cern.c2mon.server.common.republisher.Republisher;
-import cern.c2mon.server.common.republisher.RepublisherFactory;
 import cern.c2mon.server.common.tag.Tag;
 import cern.c2mon.shared.client.serializer.TransferTagSerializer;
 import cern.c2mon.shared.client.tag.TransferTagValueImpl;
+import cern.c2mon.shared.daq.republisher.Publisher;
+import cern.c2mon.shared.daq.republisher.Republisher;
+import cern.c2mon.shared.daq.republisher.RepublisherFactory;
 import cern.c2mon.shared.util.jms.JmsSender;
 
 /**

@@ -18,8 +18,6 @@ package cern.c2mon.server.client.publish;
 
 import javax.annotation.PostConstruct;
 
-import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.SmartLifecycle;
@@ -28,18 +26,22 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+
+import lombok.extern.slf4j.Slf4j;
+
 import cern.c2mon.server.cache.C2monCacheListener;
 import cern.c2mon.server.cache.CacheRegistrationService;
 import cern.c2mon.server.cache.TagLocationService;
 import cern.c2mon.server.client.util.TransferObjectFactory;
 import cern.c2mon.server.common.alarm.Alarm;
-import cern.c2mon.server.common.component.Lifecycle;
 import cern.c2mon.server.common.config.ServerConstants;
-import cern.c2mon.server.common.republisher.Publisher;
-import cern.c2mon.server.common.republisher.Republisher;
-import cern.c2mon.server.common.republisher.RepublisherFactory;
 import cern.c2mon.server.common.tag.Tag;
 import cern.c2mon.shared.client.alarm.AlarmValue;
+import cern.c2mon.shared.daq.lifecycle.Lifecycle;
+import cern.c2mon.shared.daq.republisher.Publisher;
+import cern.c2mon.shared.daq.republisher.Republisher;
+import cern.c2mon.shared.daq.republisher.RepublisherFactory;
 import cern.c2mon.shared.util.jms.JmsSender;
 import cern.c2mon.shared.util.json.GsonFactory;
 
