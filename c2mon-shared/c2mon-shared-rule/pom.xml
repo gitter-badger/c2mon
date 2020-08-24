@@ -5,7 +5,7 @@
   <parent>
     <groupId>cern.c2mon.shared</groupId>
     <artifactId>c2mon-shared</artifactId>
-    <version>1.9.11-SNAPSHOT</version>
+    <version>1.9.5-CM-242-daq-client-properties-SNAPSHOT</version>
   </parent>
 
   <artifactId>c2mon-shared-rule</artifactId>
@@ -23,10 +23,6 @@
     </dependency>
 
     <!-- 3rd-party dependencies -->
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-    </dependency>
 
     <!-- Test dependencies -->
     <dependency>
