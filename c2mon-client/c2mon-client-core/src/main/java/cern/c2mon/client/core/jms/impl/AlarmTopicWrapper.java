@@ -28,7 +28,7 @@ public class AlarmTopicWrapper extends AbstractTopicWrapper<AlarmListener, TagUp
   public AlarmTopicWrapper(final SlowConsumerListener slowConsumerListener,
                               final ExecutorService topicPollingExecutor,
                               final C2monClientProperties properties) {
-    super(slowConsumerListener, topicPollingExecutor, properties.getJms().getAlarmTopic());
+    super(slowConsumerListener, topicPollingExecutor, properties.getJms().getAlarmWithTagTopic());
   }
   
   @Override

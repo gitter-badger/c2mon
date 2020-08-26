@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
+import cern.c2mon.server.cache.AliveTimerFacade;
 import cern.c2mon.server.cache.alarm.AlarmAggregatorListener;
 import cern.c2mon.server.cache.alarm.AlarmAggregatorRegistration;
 import cern.c2mon.server.client.config.ClientProperties;
@@ -64,13 +65,16 @@ public class AlarmPublisher implements SmartLifecycle, AlarmAggregatorListener, 
   private final JmsSender jmsSender;
   
   /** The configured JMS alarm topic, extracted from {@link ClientProperties} */
-  private final String tagWithAlarmsTopic;
+  private final String alarmWithTagTopic;
   
   /** Listens for Tag updates, evaluates all associated alarms and passes the result */
   private final AlarmAggregatorRegistration alarmAggregatorRegistration;
 
   /** Contains re-publication logic */
   private final Republisher<TagWithAlarms> republisher;
+  
+  /** Used to determine, whether a given tag is an AliveTag */
+  private final AliveTimerFacade aliveTimerFacade;
 
   /** Lifecycle flag */
   private boolean running;
@@ -84,11 +88,13 @@ public class AlarmPublisher implements SmartLifecycle, AlarmAggregatorListener, 
   @Autowired
   public AlarmPublisher(@Qualifier("alarmTopicPublisher") final JmsSender jmsSender, 
       final AlarmAggregatorRegistration alarmAggregatorRegistration,
+      final AliveTimerFacade aliveTimerFacade,
       final ClientProperties properties) {
 
     this.jmsSender = jmsSender;
+    this.aliveTimerFacade = aliveTimerFacade;
     this.alarmAggregatorRegistration = alarmAggregatorRegistration;
-    this.tagWithAlarmsTopic = properties.getJms().getTagWithAlarmsTopic();
+    this.alarmWithTagTopic = properties.getJms().getAlarmWithTagTopic();
     
     republisher = RepublisherFactory.createRepublisher(this, "TagWithAlarms");
   }
@@ -183,14 +189,15 @@ public class AlarmPublisher implements SmartLifecycle, AlarmAggregatorListener, 
   
   @Override
   public void publish(final TagWithAlarms tagWithAlarms) {
-    TransferTagValueImpl tagValue = TransferObjectFactory.createTransferTagValue(tagWithAlarms);
+    boolean isRegisteredAliveTimer = aliveTimerFacade.isRegisteredAliveTimer(tagWithAlarms.getTag().getId());
+    TransferTagValueImpl tagValue = TransferObjectFactory.createTransferTag(tagWithAlarms, isRegisteredAliveTimer, "N/A");
     
     if (log.isTraceEnabled()) {
-      log.trace("Publishing alarm(s) with full tag object for tag id #{} to topic {}", tagWithAlarms.getTag().getId(), tagWithAlarmsTopic);
+      log.trace("Publishing alarm(s) with full tag object for tag id #{} to topic {}", tagWithAlarms.getTag().getId(), alarmWithTagTopic);
     }
 
     try {
-      jmsSender.sendToTopic(TransferTagSerializer.toJson(tagValue), tagWithAlarmsTopic);
+      jmsSender.sendToTopic(TransferTagSerializer.toJson(tagValue), alarmWithTagTopic);
     } catch (JmsException e) {
       log.error("Error publishing alarm(s) with full tag object to clients - submitting for republication for tag #{} + alarms", tagWithAlarms.getTag().getId(), e);
       republisher.publicationFailed(tagWithAlarms);
