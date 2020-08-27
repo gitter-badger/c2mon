@@ -165,10 +165,8 @@ public class AlarmPublisher implements SmartLifecycle, AlarmAggregatorListener, 
    */
   @Override
   public void notifyOnSupervisionChange(Tag tag, List<Alarm> alarms) {
-    if (alarms != null && !alarms.isEmpty()) {
-      if (alarms.stream().anyMatch(a -> a.isActive())) {
-        publish(new TagWithAlarmsImpl(tag, alarms));
-      }
+    if (alarms != null && alarms.stream().anyMatch(a -> a.isActive())) {
+      publish(new TagWithAlarmsImpl(tag, alarms));
     }
   }
 

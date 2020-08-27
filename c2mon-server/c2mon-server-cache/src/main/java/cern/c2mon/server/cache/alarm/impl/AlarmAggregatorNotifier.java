@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2010-2020 CERN. All rights not expressly granted are reserved.
+ *
+ * This file is part of the CERN Control and Monitoring Platform 'C2MON'.
+ * C2MON is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, either version 3 of the license.
+ *
+ * C2MON is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package cern.c2mon.server.cache.alarm.impl;
 
 import java.util.ArrayList;
@@ -12,15 +28,21 @@ import cern.c2mon.server.cache.alarm.AlarmAggregatorListener;
 import cern.c2mon.server.common.alarm.Alarm;
 import cern.c2mon.server.common.tag.Tag;
 
+/**
+ * This class implements the the logic of the {@link AlarmAggregatorRegistration} 
+ * interface and notifies about tag and alarm changes. 
+ * <p/>
+ * It is also used internally by the {@link AlarmAggregatorImpl} to inform 
+ * listeners about alarm changes related to supervision events.
+ * 
+ * @author Matthias Braeger
+ */
 @Slf4j
 @Component
 public class AlarmAggregatorNotifier implements AlarmAggregatorRegistration {
-  /**
-   * List of registered listeners.
-   */
-  private final List<AlarmAggregatorListener> listeners = new ArrayList<>();;
 
-  
+  private final List<AlarmAggregatorListener> listeners = new ArrayList<>();
+
   public void registerForTagUpdates(final AlarmAggregatorListener aggregatorListener) {
     listeners.add(aggregatorListener);
   }

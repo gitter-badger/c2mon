@@ -29,18 +29,13 @@ import cern.c2mon.server.cache.C2monCacheListener;
 import cern.c2mon.server.cache.CacheRegistrationService;
 import cern.c2mon.server.cache.CacheSupervisionListener;
 import cern.c2mon.server.cache.TagFacadeGateway;
-import cern.c2mon.server.cache.alarm.AlarmAggregatorRegistration;
 import cern.c2mon.server.common.alarm.Alarm;
 import cern.c2mon.server.common.tag.Tag;
 
 /**
- * Implementation of the {@link AlarmAggregatorRegistration} (a singleton bean in the server
- * context).
- * 
- * <p>
  * This implementation registers for synchronous notifications from the cache
  * (i.e. on original JMS update thread). These calls are passed through to the
- * client module on the same thread (may need adjusting).
+ * client module on the same thread.
  * 
  * @author Mark Brightwell
  *
@@ -114,9 +109,7 @@ public class AlarmAggregatorImpl implements C2monCacheListener<Tag>, CacheSuperv
 
   @Override
   public void onSupervisionChange(final Tag tag) {
-    if (log.isTraceEnabled()) {
-      log.trace("Evaluating alarm for tag #{} due to supervision status notification", tag.getId());
-    }
+    log.trace("Evaluating alarm for tag #{} due to supervision status notification", tag.getId());
     List<Alarm> alarms = evaluateAlarms(tag);
     notifier.notifyOnSupervisionChange(tag, alarms);
   }
