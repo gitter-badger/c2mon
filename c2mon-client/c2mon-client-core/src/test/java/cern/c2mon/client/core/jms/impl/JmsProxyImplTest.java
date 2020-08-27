@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2010-2019 CERN. All rights not expressly granted are reserved.
+ * Copyright (C) 2010-2020 CERN. All rights not expressly granted are reserved.
  * 
  * This file is part of the CERN Control and Monitoring Platform 'C2MON'.
  * C2MON is free software: you can redistribute it and/or modify it under the
@@ -17,10 +17,12 @@
 package cern.c2mon.client.core.jms.impl;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.jms.*;
 
 import org.apache.activemq.ActiveMQConnection;
+import org.awaitility.Awaitility;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -149,7 +151,10 @@ public class JmsProxyImplTest {
   public void testStartAndSendRequestNullRequest() throws JMSException, InterruptedException { 
     //need to simulate start
     MessageConsumer messageConsumer = simulateStart();
-    Thread.sleep(2000); //leave time for connection thread to run (and set connected flag to true)
+    
+    Awaitility.await().atMost(2, TimeUnit.SECONDS)
+    .until(() -> connetionHandler.isConnected());
+    
     jmsProxy.sendRequest(null, "test.queue", 1000);
     EasyMock.verify(connectionFactory);
     EasyMock.verify(connection);

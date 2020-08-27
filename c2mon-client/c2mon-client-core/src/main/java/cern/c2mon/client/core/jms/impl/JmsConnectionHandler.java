@@ -434,12 +434,7 @@ class JmsConnectionHandler {
       if (connected) {
         // notifies listeners
         disconnect();
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            connect();
-          }
-        }).start();
+        new Thread(() -> connect()).start();
       }
     } finally {
       connectingWriteLock.unlock();
