@@ -258,6 +258,11 @@ public class AlarmFacadeImpl extends AbstractFacade<Alarm> implements AlarmFacad
     
     alarmAggregatorNotifier.notifyOnUpdate(tagCopy, getAlarms(tagCopy));
   }
+  
+  @Override
+  public void notifyOnAlarmOscillationReset(final Tag tag) {
+    alarmAggregatorNotifier.notifyOnUpdate(tag, getAlarms(tag));
+  }
 
   /**
    * Perform a series of consistency checks on the AlarmCacheObject. This method

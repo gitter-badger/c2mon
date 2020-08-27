@@ -85,4 +85,11 @@ public interface AlarmFacade extends ConfigurableCacheFacade<Alarm> {
    * @param removedAlarm A copy of the alarm that got removed
    */
   void notifyOnAlarmRemoval(AlarmCacheObject removedAlarm);
+  
+  /**
+   * Notifies {@link AlarmAggregatorListener} about the reset of an alarm oscillation on the
+   * given tag. We assume that at this stage the required alarm cache update took already place. 
+   * @param tag The Tag on which the alarm oscillation flag was reset
+   */
+  void notifyOnAlarmOscillationReset(final Tag tag);
 }
