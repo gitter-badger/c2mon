@@ -40,6 +40,8 @@ import cern.c2mon.shared.common.datatag.util.ValueDeadbandType;
 import cern.c2mon.shared.util.parser.ParserException;
 import cern.c2mon.shared.util.parser.SimpleXMLParser;
 
+import static cern.c2mon.shared.common.datatag.DataTagConstants.*;
+
 /**
  * Address associated with a DataTag DataTags are linked to data sources (e.g.
  * PLCs, external SCADA systems etc.) via a DataTagAddress object. This
@@ -52,7 +54,7 @@ import cern.c2mon.shared.util.parser.SimpleXMLParser;
  */
 @Slf4j
 @Data
-public class DataTagAddress implements Serializable, Cloneable, DataTagConstants {
+public class DataTagAddress implements Serializable, Cloneable {
 
   /**
    * Version number of the class used during serialization/deserialization.
@@ -521,7 +523,9 @@ public class DataTagAddress implements Serializable, Cloneable, DataTagConstants
   }
 
   public void validate() throws ConfigurationException {
-    if (this.priority != PRIORITY_HIGH && this.priority != PRIORITY_MEDIUM && this.priority != PRIORITY_LOW) {
+    JmsMessagePriority msgPrio = JmsMessagePriority.getJmsMessagePriority(priority);
+    
+    if (this.priority != msgPrio.getPriority()) {
       throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE,
           "Parameter \"priority\" must be either 2 (LOW), 4 (MEDIUM) or 7 (HIGH)");
     }

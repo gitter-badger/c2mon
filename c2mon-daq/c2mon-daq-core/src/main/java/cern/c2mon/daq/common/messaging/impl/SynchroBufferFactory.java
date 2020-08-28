@@ -147,7 +147,7 @@ class SynchroBufferFactory {
    * @return <code>true</code>, if the message has expired
    */
   private boolean isMessageExpired(final SourceDataTagValue sdtValue) {
-    return sdtValue.getTimeToLive() != DataTagAddress.TTL_FOREVER 
+    return sdtValue.getTimeToLive() != DataTagConstants.TTL_FOREVER 
         && (sdtValue.getDaqTimestamp().getTime() + sdtValue.getTimeToLive()) < System.currentTimeMillis();
   }
 }

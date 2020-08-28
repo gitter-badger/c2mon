@@ -392,7 +392,7 @@ public abstract class AbstractTagFacade<T extends Tag> extends AbstractFacade<T>
     dataTagUpdate.setDataTagAddressUpdate(dataTagAddressUpdate);
     dataTagAddressUpdate.setGuaranteedDelivery(dataTagAddress.isGuaranteedDelivery());
     dataTagAddressUpdate.setPriority(dataTagAddress.getPriority());
-    if (dataTagAddress.getTimeToLive() != DataTagAddress.TTL_FOREVER) {
+    if (dataTagAddress.getTimeToLive() != DataTagConstants.TTL_FOREVER) {
       dataTagAddressUpdate.setTimeToLive(dataTagAddress.getTimeToLive());
     }
     if (dataTagAddress.getValueDeadbandType() != ValueDeadbandType.NONE.getId().shortValue()) {

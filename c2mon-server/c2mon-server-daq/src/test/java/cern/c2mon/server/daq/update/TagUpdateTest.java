@@ -30,6 +30,7 @@ import cern.c2mon.server.daq.config.DaqModule;
 import cern.c2mon.server.daq.junit.DaqCachePopulationRule;
 import cern.c2mon.server.supervision.config.SupervisionModule;
 import cern.c2mon.shared.common.datatag.*;
+import cern.c2mon.shared.common.datatag.util.JmsMessagePriority;
 import cern.c2mon.shared.common.datatag.util.SourceDataTagQualityCode;
 import cern.c2mon.shared.common.datatag.util.TagQualityStatus;
 
@@ -129,7 +130,7 @@ public class TagUpdateTest {
         .quality(new SourceDataTagQuality())
         .timestamp(timestamp)
         .daqTimestamp(new Timestamp(System.currentTimeMillis()))
-        .priority(DataTagConstants.PRIORITY_LOW)
+        .priority(JmsMessagePriority.PRIORITY_LOW.getPriority())
         .valueDescription("test description")
         .timeToLive(DataTagConstants.TTL_FOREVER)
         .build();
@@ -167,7 +168,7 @@ public class TagUpdateTest {
         .quality(new SourceDataTagQuality(SourceDataTagQualityCode.DATA_UNAVAILABLE))
         .timestamp(timestamp)
         .daqTimestamp(new Timestamp(System.currentTimeMillis()))
-        .priority(DataTagConstants.PRIORITY_LOW)
+        .priority(JmsMessagePriority.PRIORITY_LOW.getPriority())
         .valueDescription("test description")
         .timeToLive(DataTagConstants.TTL_FOREVER)
         .build();
@@ -207,7 +208,7 @@ public class TagUpdateTest {
         .quality(new SourceDataTagQuality())
         .timestamp(timestamp)
         .daqTimestamp(new Timestamp(System.currentTimeMillis()))
-        .priority(DataTagConstants.PRIORITY_LOW)
+        .priority(JmsMessagePriority.PRIORITY_LOW.getPriority())
         .valueDescription("test description")
         .timeToLive(DataTagConstants.TTL_FOREVER)
         .build();
