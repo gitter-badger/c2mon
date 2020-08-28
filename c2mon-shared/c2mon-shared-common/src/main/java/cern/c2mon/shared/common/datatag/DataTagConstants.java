@@ -16,7 +16,7 @@
  *****************************************************************************/
 package cern.c2mon.shared.common.datatag;
 
-import javax.jms.Message;
+import cern.c2mon.shared.common.datatag.util.JmsMessagePriority;
 
 /**
  * Constants used through the TIM system.
@@ -77,8 +77,11 @@ public interface DataTagConstants {
    * a certain delay in processing.
    * <p>
    * The exact delay is configured is the DAQ properties.
+   * 
+   * @deprecated Please use {@link JmsMessagePriority#PRIORITY_LOW} instead
    */
-  public static final int PRIORITY_LOW = 2;
+  @Deprecated
+  public static final int PRIORITY_LOW = JmsMessagePriority.PRIORITY_LOW.getPriority();
 
   /**
    * Tags with priority set to PRIORITY_MEDIUM can be grouped together in
@@ -87,8 +90,11 @@ public interface DataTagConstants {
    * a certain delay in processing.
    * <p>
    * The exact delay is configured is the DAQ properties.
+   * 
+   * @deprecated Please use {@link JmsMessagePriority#PRIORITY_MEDIUM} instead
    */
-  public static final int PRIORITY_MEDIUM = Message.DEFAULT_PRIORITY;
+  @Deprecated
+  public static final int PRIORITY_MEDIUM = JmsMessagePriority.PRIORITY_MEDIUM.getPriority();
 
   /**
    * Tags with priority set to PRIORITY_HIGHEST can be grouped together in
@@ -98,8 +104,11 @@ public interface DataTagConstants {
    * and {@link DataTagConstants#PRIORITY_MEDIUM}
    * <p>
    * The exact delay is configured is the DAQ properties.
+   * 
+   * @deprecated Please use {@link JmsMessagePriority#PRIORITY_HIGH} instead
    */
-  public static final int PRIORITY_HIGH = 7;
+  @Deprecated
+  public static final int PRIORITY_HIGH = JmsMessagePriority.PRIORITY_HIGH.getPriority();
   
   /**
    * This flag is reserved for control tags, such as Alive and COMM_FAULT Tags.
@@ -107,8 +116,11 @@ public interface DataTagConstants {
    * without delay. Value updates must be notified to the server immediately.
    * The JMS priority of the DataTagValueUpdate message must also be set
    * to PRIORITY_HIGHEST.
+   * 
+   * @deprecated Please use {@link JmsMessagePriority#PRIORITY_HIGHEST} instead
    */
-  public static final int PRIORITY_HIGHEST = 9;
+  @Deprecated
+  public static final int PRIORITY_HIGHEST = JmsMessagePriority.PRIORITY_HIGHEST.getPriority();
 
   // ----------------------------------------------------------------------------
   // TRANSFORMATION CONSTANT DEFINITIONS

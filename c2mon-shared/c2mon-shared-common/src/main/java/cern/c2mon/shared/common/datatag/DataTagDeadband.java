@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2010-2016 CERN. All rights not expressly granted are reserved.
+ * Copyright (C) 2010-2020 CERN. All rights not expressly granted are reserved.
  * 
  * This file is part of the CERN Control and Monitoring Platform 'C2MON'.
  * C2MON is free software: you can redistribute it and/or modify it under the
@@ -16,18 +16,24 @@
  *****************************************************************************/
 package cern.c2mon.shared.common.datatag;
 
-/**
- * @author J. Stowisek
- * @version $Revision: 1.1 $ ($Date: 2004/11/05 11:15:53 $ - $State: Exp $)
- */
+import static cern.c2mon.shared.common.datatag.util.ValueDeadbandType.*;
 
+import cern.c2mon.shared.common.datatag.util.ValueDeadbandType;
+
+/**
+ * Definition of the supported value deadband types which can be configured for numeric DataTags
+ * 
+ * @author J. Stowisek
+ * @deprecated Please use {@link ValueDeadbandType} instead.
+ */
+@Deprecated
 public final class DataTagDeadband {
     /**
      * Constant to be used to disable value-based deadband filtering in a DAQ process.
      * 
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      */
-    public static final short DEADBAND_NONE = 0;
+    public static final short DEADBAND_NONE = NONE.getId().shortValue();
 
     /**
      * Constant to be used to enable absolute value deadband filtering on the DAQ process level. When absolute value
@@ -37,7 +43,7 @@ public final class DataTagDeadband {
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadband(float)
      */
-    public static final short DEADBAND_PROCESS_ABSOLUTE = 1;
+    public static final short DEADBAND_PROCESS_ABSOLUTE = PROCESS_ABSOLUTE.getId().shortValue();
 
     /**
      * Constant to be used to enable relative value deadband filtering on the DAQ process level. When absolute value
@@ -47,7 +53,7 @@ public final class DataTagDeadband {
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadband(float)
      */
-    public static final short DEADBAND_PROCESS_RELATIVE = 2;
+    public static final short DEADBAND_PROCESS_RELATIVE = PROCESS_RELATIVE.getId().shortValue();
 
     /**
      * Constant to be used to enable absolute value deadband filtering on the equipment message handler level. When
@@ -58,7 +64,7 @@ public final class DataTagDeadband {
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadband(float)
      */
-    public static final short DEADBAND_EQUIPMENT_ABSOLUTE = 3;
+    public static final short DEADBAND_EQUIPMENT_ABSOLUTE = EQUIPMENT_ABSOLUTE.getId().shortValue();
 
     /**
      * Constant to be used to enable relative value deadband filtering on the equipment message handler level. When
@@ -69,7 +75,7 @@ public final class DataTagDeadband {
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadband(float)
      */
-    public static final short DEADBAND_EQUIPMENT_RELATIVE = 4;
+    public static final short DEADBAND_EQUIPMENT_RELATIVE = EQUIPMENT_RELATIVE.getId().shortValue();
 
     /**
      * Constant to be used to enable absolute value deadband filtering on the DAQ process level. As long as value
@@ -79,7 +85,7 @@ public final class DataTagDeadband {
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadband(float)
      */
-    public static final short DEADBAND_PROCESS_ABSOLUTE_VALUE_DESCR_CHANGE = 5;
+    public static final short DEADBAND_PROCESS_ABSOLUTE_VALUE_DESCR_CHANGE = PROCESS_ABSOLUTE_VALUE_DESCR_CHANGE.getId().shortValue();
 
     /**
      * Constant to be used to enable relative value deadband filtering on the DAQ process level. As long as value
@@ -89,7 +95,7 @@ public final class DataTagDeadband {
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadbandType(short)
      * @see cern.c2mon.shared.common.datatag.DataTagAddress#setValueDeadband(float)
      */
-    public static final short DEADBAND_PROCESS_RELATIVE_VALUE_DESCR_CHANGE = 6;
+    public static final short DEADBAND_PROCESS_RELATIVE_VALUE_DESCR_CHANGE = PROCESS_RELATIVE_VALUE_DESCR_CHANGE.getId().shortValue();
 
     /**
      * @return a String representation of the specified valueDeadbandType
