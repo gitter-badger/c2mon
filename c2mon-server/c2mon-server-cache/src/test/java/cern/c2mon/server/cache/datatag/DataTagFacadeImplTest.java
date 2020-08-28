@@ -31,6 +31,7 @@ import cern.c2mon.server.test.CacheObjectCreation;
 import cern.c2mon.shared.common.ConfigurationException;
 import cern.c2mon.shared.common.datatag.*;
 import cern.c2mon.shared.common.datatag.util.SourceDataTagQualityCode;
+import cern.c2mon.shared.common.datatag.util.TagQualityStatus;
 
 import org.springframework.mock.env.MockEnvironment;
 
