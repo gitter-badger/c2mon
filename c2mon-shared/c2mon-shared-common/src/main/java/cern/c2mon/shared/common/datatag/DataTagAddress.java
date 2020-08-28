@@ -353,6 +353,14 @@ public class DataTagAddress implements Serializable, Cloneable {
       this.timeDeadband = 0;
     }
   }
+  
+  /**
+   * Method required for internal deserialization.
+   */
+  @SuppressWarnings("unused")
+  private void setValueDeadbandType(short type) {
+    this.valueDeadbandType = type;
+  }
 
   /**
    * Set the type of deadband filter for this DataTagAddress object. If an
@@ -374,6 +382,16 @@ public class DataTagAddress implements Serializable, Cloneable {
     } else {
       this.valueDeadband = 0f;
     }
+  }
+  
+  /**
+   * Internal usage only, required for deserialization
+   * 
+   * @param priority The JMS message priority for a given tag
+   */
+  @SuppressWarnings("unused")
+  private void setPriority(int priority) {
+    this.priority = priority;
   }
   
   /**
