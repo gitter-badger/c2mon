@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import cern.c2mon.shared.common.datatag.*;
 import cern.c2mon.shared.common.datatag.util.JmsMessagePriority;
+import cern.c2mon.shared.common.datatag.util.SourceDataTagQualityCode;
 import cern.c2mon.shared.common.datatag.util.ValueDeadbandType;
 import cern.c2mon.shared.common.filter.FilteredDataTagValue.FilterType;
 

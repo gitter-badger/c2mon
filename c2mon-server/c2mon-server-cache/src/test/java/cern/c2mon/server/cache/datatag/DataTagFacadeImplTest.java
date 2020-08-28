@@ -30,6 +30,8 @@ import cern.c2mon.server.common.datatag.DataTagCacheObject;
 import cern.c2mon.server.test.CacheObjectCreation;
 import cern.c2mon.shared.common.ConfigurationException;
 import cern.c2mon.shared.common.datatag.*;
+import cern.c2mon.shared.common.datatag.util.SourceDataTagQualityCode;
+
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.junit.Assert.assertEquals;

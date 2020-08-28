@@ -30,6 +30,8 @@ import cern.c2mon.server.daq.config.DaqModule;
 import cern.c2mon.server.daq.junit.DaqCachePopulationRule;
 import cern.c2mon.server.supervision.config.SupervisionModule;
 import cern.c2mon.shared.common.datatag.*;
+import cern.c2mon.shared.common.datatag.util.SourceDataTagQualityCode;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
