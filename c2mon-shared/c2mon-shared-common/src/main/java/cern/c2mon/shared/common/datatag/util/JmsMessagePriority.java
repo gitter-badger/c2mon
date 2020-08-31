@@ -86,7 +86,7 @@ public enum JmsMessagePriority {
    */
   public static final JmsMessagePriority getJmsMessagePriority(int priorityLevel) {
     for (JmsMessagePriority priority : JmsMessagePriority.values()) {
-      if (priority.equals(priority)) {
+      if (priority.getPriority() == priorityLevel) {
         return priority;
       }
     }
