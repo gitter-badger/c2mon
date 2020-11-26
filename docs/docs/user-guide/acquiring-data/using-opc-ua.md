@@ -24,7 +24,7 @@ C2MON offers an open source data acquisition module to easily monitor data point
 C2MON can easily be configured to acquire data through OPC UA. Provides a hand's on example by setting up a C2MON
  instance to monitor randomly generated data via a custom OPC UA server. 
  
-## Setting up our services
+## Configuring our services
 In order to monitor our data points we must set up the services required for operating C2MON. This can be done in
  different ways as described in [Getting Started]({{ site.baseurl }}{% link docs/getting-started.md %}). In this
   example we will use Docker images.
@@ -38,9 +38,10 @@ We will setup out C2MON instance with the following services:
 * [Grafana](https://grafana.com/) for visualization
 * [Prometheus](https://prometheus.io/) for monitoring
 
-Only the C2MON server and ActiveMQ are required to operate a C2MON instance. The remaining services are selections of
- the rich infrastructure of C2MON client and data acquisition applications. The services can conveniently be defined in
-  a [Docker Compose](https://docs.docker.com/compose/) file as follows:
+For the sake of simplicity and clarity we are not taking advantage of C2MON's full capabilities of redundancy or integration with Elasticsearch. 
+Instead we employ a selection of services from the rich infrastructure of C2MON client and data acquisition applications. 
+
+All services can conveniently be defined in a [Docker Compose](https://docs.docker.com/compose/) file as follows:
 
 ```yaml
        version: "3.8"
@@ -63,15 +64,19 @@ Only the C2MON server and ActiveMQ are required to operate a C2MON instance. The
              - C2MON_SERVER_HISTORY_JDBC_JDBC-URL=jdbc:mysql://db/tim
              - C2MON_SERVER_CONFIGURATION_JDBC_JDBC-URL=jdbc:mysql://db/tim
              - C2MON_SERVER_TESTMODE=false
-            
+           restart: on-failure
+
          mq:
-           image: cern/c2mon-ext:activemq-5.15.6-c2mon-1.9.0
+           image: gitlab-registry.cern.ch/c2mon/c2mon/mq:activemq-5.15.2-c2mon-1.9.11-SNAPSHOT
            ports:
              - "61616:61616"
              - "61614:61614"
-       
+             - "1883:1883"
+             - "8086:8086"
+             - "8161:8161"
+
          db:
-           image: cern/c2mon-ext:mysql-5.7.15-c2mon-1.9.0
+           image: gitlab-registry.cern.ch/c2mon/c2mon/mysql:activemq-5.15.2-c2mon-1.9.11-SNAPSHOT
            ports:
              - "3306:3306"
            environment:
@@ -86,7 +91,7 @@ Only the C2MON server and ActiveMQ are required to operate a C2MON instance. The
            command: --config.file=/etc/prometheus/prometheus.yml
            
          grafana:
-           image: grafana/grafana
+           image: gitlab-registry.cern.ch/c2mon/c2mon/grafana:grafana-6.1.2-c2mon-1.9.11-SNAPSHOT
            ports:
              - "3000:3000"
            environment:
@@ -100,7 +105,7 @@ Only the C2MON server and ActiveMQ are required to operate a C2MON instance. The
              - "50000:50000"
            command: --unsecuretransport
        
-         daq-opcua:
+         daq:
            image: gitlab-registry.cern.ch/c2mon/c2mon-daq-opcua
            ports:
              - "8912:8912"
@@ -115,13 +120,44 @@ Only the C2MON server and ActiveMQ are required to operate a C2MON instance. The
 
 ```
 
-Prometheus  is a monitoring tools which we will use to scrape the C2MON OPC UA DAQ for interesting metrics. These
- metrics can help us identify the source of errors, bottlenecks, or performance issues. Prometheus is configured via
-  a configuration file which specifies monitoring behavior and targets. More information regarding available
-   configuration options for Prometheus can be found in the official [documentation](https://prometheus.io/docs/prometheus/latest/configuration/configuration/).
- 
- The configuration file for this example should be saved in the location `~/prometheus/prometheus.yml` and contain
-  the OPC UA DAQ as a target:
+The C2MON server requires ActiveMQ and MySQL to run. 
+Let's start these services for now:
+
+```bash
+docker-compose up mq db c2mon
+```
+
+The output "C2MON server is now initialised" indicates a successful startup.
+
+## Configuring C2MON via the Dynamic Configuration module
+
+In order to acquire data from the C2MON server, we need to configure DataTags.
+We will use the interactive [C2MON Client Configuration Shell]({{ site.baseurl }}{% link docs/user-guide/dynamic-configuration-shell.md %}) to configure our DataTags for convenience.
+The Shell allows us to easily create and configure DataTags on-the-fly.
+Use cases requiring more fine-grained configuration can be addressed through the Java-based Client API for subscribing to tags which is described in detail in [Client API]({{ site.baseurl }}{% link docs/user-guide/configuration-api.md %}).
+
+We are using an industrial IoT sample [OPC UA server](https://github.com/Azure-Samples/iot-edge-opc-plc) by Mirosoft as a data source.
+The server offers different nodes generating random data and anomalies which can be explored using any OPC UA browser.
+
+
+Let's start the shell and run the following commands:
+
+```bash
+opc.tcp://power-supply-sim:4841?itemName=simSY4527.Board00.Chan000.IMon?tagName=IMon-EQ00&dataType=java.lang.Float&setNamespace=2;opc.tcp://power-supply-sim:4841?itemName=simSY4527.Board00.Chan000.VMon?tagName=VMon-EQ00&dataType=java.lang.Float&setNamespace=2  
+
+```
+
+
+## Metrics visualization and monitoring
+
+
+Prometheus  is a monitoring tools which we will use to scrape the C2MON OPC UA DAQ for interesting metrics. 
+These metrics can help us identify the source of errors, bottlenecks, or performance issues. 
+We will later proceed to visualize the metrics in the analytics and monitoring platform Grafana to generate insight into the state of our data acquisition processes.
+Prometheus is configured via a configuration file which specifies monitoring behavior and targets. 
+More information regarding available configuration options for Prometheus can be found in the official [documentation](https://prometheus.io/docs/prometheus/latest/configuration/configuration/).
+
+The configuration file for this example should be saved in the location `~/prometheus/prometheus.yml` and contain the OPC UA DAQ as a target:
 
 ```yaml
 scrape_configs:
@@ -130,16 +166,3 @@ scrape_configs:
     static_configs:
       - targets: ['daq-opcua:8912']
 ```
-
-## Configuring C2MON via the Dynamic Configuration module
-
-We are using an industrial IoT sample [OPC UA server](https://github.com/Azure-Samples/iot-edge-opc-plc) by Mirosoft
- as a data source. The server offers different nodes generating random data and anomalies. We can monitor this data
-  by configuring the corresponding tags in C2MON.
-
-C2MON offers Java-based Client API for subscribing to tags which is described in detail in the section
- [Client API]({{ site.baseurl }}{% link docs/user-guide/configuration-api.md %}) section.
-
-We will use the Client API's dynamic configuration module to configure our C2MON instance.
-
-## Metrics visualization and monitoring
