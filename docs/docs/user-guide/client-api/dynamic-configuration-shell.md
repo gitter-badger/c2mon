@@ -71,7 +71,6 @@ c2mon:
     client:
         dynconfig:
             mappings:
-
             -   processName: P_DYNDIP
                 processID: 1001
                 processDescription: DIP sample Process

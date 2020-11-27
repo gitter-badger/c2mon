@@ -33,136 +33,97 @@ We will setup out C2MON instance with the following services:
 * C2MON server
 * A MySQL database
 * ActiveMQ as a message broker
+* Elasticsearch, a search and analytics engine
+* The [C2MON Web UI](https://github.com/c2mon/c2mon-web-ui/blob/master/README.md), a graphical web interface for C2MON
 * An [OPC UA server](https://github.com/Azure-Samples/iot-edge-opc-plc) as a data source
 * The [C2MON OPC UA DAQ](https://github.com/c2mon/c2mon-daq-opcua) to monitor our OPC UA Server
 * [Grafana](https://grafana.com/) for visualization
 * [Prometheus](https://prometheus.io/) for monitoring
 
-For the sake of simplicity and clarity we are not taking advantage of C2MON's full capabilities of redundancy or integration with Elasticsearch. 
-Instead we employ a selection of services from the rich infrastructure of C2MON client and data acquisition applications. 
+Not all of these services are strictly required: in this example we employ a selection of services from the rich infrastructure of C2MON client and data acquisition applications. 
 
-All services can conveniently be defined in a [Docker Compose](https://docs.docker.com/compose/) file as follows:
+<!----LINK TO PUBLIC RESOURCE REPO ---->
 
-```yaml
-       version: "3.8"
-       services:
-       
-         c2mon:
-           image: cern/c2mon:1.9.3-SNAPSHOT
-           ports:
-             - "9001:9001"
-           environment:
-             - C2MON_SERVER_ELASTICSEARCH_ENABLED=false
-             - C2MON_SERVER_ELASTICSEARCH_EMBEDDED=false
-             - C2MON_SERVER_JMS_EMBEDDED=false
-             - C2MON_SERVER_JMS_URL=tcp://mq:61616
-             - C2MON_SERVER_CACHEDBACCESS_JDBC_VALIDATION-QUERY=SELECT 1
-             - C2MON_SERVER_JDBC_DRIVER-CLASS-NAME=com.mysql.jdbc.Driver
-             - C2MON_SERVER_JDBC_URL=jdbc:mysql://db/tim
-             - C2MON_SERVER_JDBC_USERNAME=root
-             - C2MON_SERVER_CACHEDBACCESS_JDBC_JDBC-URL=jdbc:mysql://db/tim
-             - C2MON_SERVER_HISTORY_JDBC_JDBC-URL=jdbc:mysql://db/tim
-             - C2MON_SERVER_CONFIGURATION_JDBC_JDBC-URL=jdbc:mysql://db/tim
-             - C2MON_SERVER_TESTMODE=false
-           restart: on-failure
-
-         mq:
-           image: gitlab-registry.cern.ch/c2mon/c2mon/mq:activemq-5.15.2-c2mon-1.9.11-SNAPSHOT
-           ports:
-             - "61616:61616"
-             - "61614:61614"
-             - "1883:1883"
-             - "8086:8086"
-             - "8161:8161"
-
-         db:
-           image: gitlab-registry.cern.ch/c2mon/c2mon/mysql:activemq-5.15.2-c2mon-1.9.11-SNAPSHOT
-           ports:
-             - "3306:3306"
-           environment:
-             - MYSQL_ALLOW_EMPTY_PASSWORD="yes"
-       
-         prometheus:
-           image: prom/prometheus:latest
-           ports:
-             - "9090:9090"
-           volumes:
-             - ~/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-           command: --config.file=/etc/prometheus/prometheus.yml
-           
-         grafana:
-           image: gitlab-registry.cern.ch/c2mon/c2mon/grafana:grafana-6.1.2-c2mon-1.9.11-SNAPSHOT
-           ports:
-             - "3000:3000"
-           environment:
-             - GF_AUTH_ANONYMOUS_ENABLED=true
-             - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
-             - GF_AUTH_ANONYMOUS_ORG_ROLE=Editor
-       
-         edge-server:
-           image: mcr.microsoft.com/iotedge/opc-plc
-           ports:
-             - "50000:50000"
-           command: --unsecuretransport
-       
-         daq:
-           image: gitlab-registry.cern.ch/c2mon/c2mon-daq-opcua
-           ports:
-             - "8912:8912"
-             - "8913:8913"
-           environment:
-             - "_JAVA_OPTIONS=-Dc2mon.daq.name=P_OPCUA -Dc2mon.daq.jms.mode=single -Dc2mon.daq.jms.url=tcp://mq:61616 -Dc2mon.client.jms.url=tcp://mq:61616 -Dc2mon.daq.opcua.trustAllServers=true -Dc2mon.daq.opcua.certifierPriority.noSecurity=3 -Dc2mon.daq.opcua.portSubstitutionMode=NONE -Dc2mon.daq.opcua.hostSubstitutionMode=SUBSTITUTE_LOCAL"
-             - LOG_PATH=/c2mon-daq-opcua-1.9.11-SNAPSHOT/tmp
-             - SPRING_JMX_ENABLED=true
-             - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=*,jolokia,prometheus
-             - MANAGEMENT_SERVER_PORT=8912
-             - C2MON_DAQ_JMS_MODE=single
-
-```
-
-The C2MON server requires ActiveMQ and MySQL to run. 
+The C2MON server requires ActiveMQ and MySQL to run. Additionally, we need the edge server to run in the background as a data source. 
 Let's start these services for now:
 
 ```bash
-docker-compose up mq db c2mon
+docker-compose up -d mq db elasticsearch c2mon edge
 ```
 
-The output "C2MON server is now initialised" indicates a successful startup.
-
-## Configuring C2MON via the Dynamic Configuration module
+## Configuring C2MON via the C2MON Client Configuration Shell
 
 In order to acquire data from the C2MON server, we need to configure DataTags.
 We will use the interactive [C2MON Client Configuration Shell]({{ site.baseurl }}{% link docs/user-guide/dynamic-configuration-shell.md %}) to configure our DataTags for convenience.
-The Shell allows us to easily create and configure DataTags on-the-fly.
+The shell allows us to easily create and configure DataTags on-the-fly. 
 Use cases requiring more fine-grained configuration can be addressed through the Java-based Client API for subscribing to tags which is described in detail in [Client API]({{ site.baseurl }}{% link docs/user-guide/configuration-api.md %}).
 
-We are using an industrial IoT sample [OPC UA server](https://github.com/Azure-Samples/iot-edge-opc-plc) by Mirosoft as a data source.
+We are using an industrial IoT sample [OPC UA server](https://github.com/Azure-Samples/iot-edge-opc-plc) by Microsoft as a data source.
 The server offers different nodes generating random data and anomalies which can be explored using any OPC UA browser.
 
-
-Let's start the shell and run the following commands:
-
-```bash
-opc.tcp://power-supply-sim:4841?itemName=simSY4527.Board00.Chan000.IMon?tagName=IMon-EQ00&dataType=java.lang.Float&setNamespace=2;opc.tcp://power-supply-sim:4841?itemName=simSY4527.Board00.Chan000.VMon?tagName=VMon-EQ00&dataType=java.lang.Float&setNamespace=2  
-
-```
-
-
-## Metrics visualization and monitoring
-
-
-Prometheus  is a monitoring tools which we will use to scrape the C2MON OPC UA DAQ for interesting metrics. 
-These metrics can help us identify the source of errors, bottlenecks, or performance issues. 
-We will later proceed to visualize the metrics in the analytics and monitoring platform Grafana to generate insight into the state of our data acquisition processes.
-Prometheus is configured via a configuration file which specifies monitoring behavior and targets. 
-More information regarding available configuration options for Prometheus can be found in the official [documentation](https://prometheus.io/docs/prometheus/latest/configuration/configuration/).
-
-The configuration file for this example should be saved in the location `~/prometheus/prometheus.yml` and contain the OPC UA DAQ as a target:
+We use a simple configuration for the shell of mapping all addresses with the binary UA scheme to the same OPC UA Process and Equipment:
 
 ```yaml
-scrape_configs:
-  - job_name: 'spring-actuator'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['daq-opcua:8912']
+c2mon:
+    client:
+        dynconfig:
+            mappings:
+            -   processName: OPC_UA_DAQ
+                processID: 10000
+                processDescription: OPC UA Process
+                equipmentName: MS_IOT_SERVER
+                equipmentDescription: OPC UA Equipment
+                uriPattern: ^opc.tcp.*
 ```
+
+As you can see, we specify the same Process name which we have defined in the arguments to our docker-compose file.    
+
+Let's start the shell and run the following commands to subscribe to one data point on the server:
+
+```bash
+java -jar c2mon-client-config-shell-1.9.11-SNAPSHOT.jar --spring.config.additional-location=file://<PROPERTIES FILE LOCATION>
+get-tags opc.tcp://edge:50000?itemName=RandomSignedInt32?tagName=RandomSignedInt&dataType=java.lang.Integer&setNamespace=2
+```
+
+As we can see from the output of the shell, the DataTag configuration is processed on the C2MON server. 
+The Process `OPC_UA_DAQ` and Equipment `MS_IOT_SERVER` are matched to our URI by the uriPattern expression, and are created on the server since they do not yet exist.
+Let's configure another tag in the shell:
+
+```bash
+get-tags opc.tcp://edge:50000?itemName=SpikeData?tagName=SpikeData&dataType=java.lang.Double&setNamespace=2;opc.tcp://edge:50000?itemName=AlternatingBoolean?tagName=AlternatingBoolean&dataType=java.lang.Boolean&setNamespace=2
+```
+
+We should now have one Process referring to one Equipment and to DataTags `RandomSignedInt`, `SpikeData` and `AlternatingBoolean`.
+
+## Data collection and visualization
+
+In order to collect data from these DataTags, the `OPC_UA_DAQ` Process needs to be running as well. 
+To explore the data we also need to run one of our client applications.
+
+Let's leave the C2MON Client Configuration Shell and start the Process as well as the C2MON Web UI:
+
+```bash
+'docker-compose up -d daq web-ui
+```
+
+We can now have a look around our configuration and our data in the [Web UI](http://localhost:8080/c2mon-web-ui/). 
+For example, you can take a look the latest values the DataTags we just defined by navigating through the "DAQ Process Viewer" to our Process, Equipment, and DataTags, and to "View Trend:"
+
+![trend viewer]({{ site.baseurl }}{% link assets/img/user-guide/acquiring-data/trend-viewer-example.png %})
+
+## Metric collection and monitoring
+
+We can also examine our data in Grafana, where we can additionally visualize and analyze a range of metrics that are exposed through the OPC UA DAQ.
+These metrics can help us identify the source of errors, bottlenecks, or performance issues, and to generate insight into the operation of our Processes. 
+We use the monitoring tool Prometheus to scrape the C2MON OPC UA DAQ for interesting metrics. 
+
+Let's start Grafana and Prometheus:
+
+```bash
+docker-compose up -d grafana prometheus
+```
+
+Grafana is now reachable under [localhost:3000](localhost:3000) with Elasticsearch and Prometheus as default data sources.
+Explore the included dashboard for relevant metrics and sights.
+
+This step by step tutorial shows how to easily configure C2MON to read from an OPC UA server as a data source.     
