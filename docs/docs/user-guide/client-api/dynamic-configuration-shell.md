@@ -21,7 +21,7 @@ The C2MON Client Configuration Shell supports DataTags only.
 The Shell relies on URIs to reference and describe DataTags. The URI must be given in the form:
 
 ```bash
-<SCHEME>://<HOST>:<PORT>/<PATH>?<QUERY=OPTION>
+<SCHEME>://<HOST>:<PORT>/<PATH>?<QUERY=OPTION>&<QUERY2=OPTION>...
 ```
 
 The first part of the URI `<SCHEME>://<HOST>:<PORT>/<PATH>` is equivalent to the Tag's "hardware address". 
@@ -55,7 +55,7 @@ In addition to the here listed query keys, it is possible to pass any query corr
 * the [DataTagAddress](https://gitlab.cern.ch/c2mon/c2mon/-/blob/master/c2mon-shared/c2mon-shared-common/src/main/java/cern/c2mon/shared/common/datatag/DataTagAddress.java), 
 * and the [protocol-specific HardwareAddress class](https://gitlab.cern.ch/c2mon/c2mon/-/blob/master/c2mon-shared/c2mon-shared-common/src/main/java/cern/c2mon/shared/common/datatag/DataTagAddress.java).
 
-For example, to set namespace of a OPC UA tag, one may append `setNamespace=namespace`.
+For example, to set namespace of a OPC UA tag, one may append `?setNamespace=4`.
 
 # Mappings
 
@@ -64,7 +64,7 @@ This is done my defining appropriate *Mappings* within the C2MON Client properti
 Regular expressions allow the fine-grained which Processes and Equipments an URIs is mapped to:
 
 The following example associates any URI starting with the scheme `opc.tcp` with an OPC UA DAQ Process "P_DYNOPCUA" and the Equipment "E_DYNOPCUA", and any URI starting with `dip` with the Process "P_DYNDIP" and equipment "E_DYNDIP".
-If DataTag is configured for a Process or Equipment which does not currently exist, it is created on-the-fly. 
+If DataTag is configured for a Process or Equipment which does not currently exist, the required entities are created on-the-fly. 
 
 ```yaml
 c2mon:
@@ -90,20 +90,22 @@ c2mon:
 
 ## SSH
 
-## JMX
+## JMX and HTTP
 
-The functions of the C2MON Client Configuration Shell are also exposed through JMX as MBean operations.
-Once running, these operations are accessible through JMX under the locator:
+The functions of the C2MON Client Configuration Shell are also exposed through JMX and HTTP using Jolokia(https://jolokia.org/) as MBean operations.
 
-```bash
-service:jmx:rmi:///jndi/rmi://<HOST'S_IP>:<PORT_NUMBER>/jmxrmi
-```
+Once the shell starts, the available endpoints can be inspected and accessed under the following locators:
 
-The MBean `cern.c2mon:name=ClientConfigurationShell,type=Config` offers the methods `getTagsForURI` and `deleteTagForURI`, which correspond to `get-tags` and `delete-tag` respectively.
+* JMX: `service:jmx:rmi:///jndi/rmi://<HOST'S_IP>:<PORT_NUMBER>/jmxrmi`
+* HTTP: `<HOST-IP>:<HOST-PORT>/actuator`
 
-## HTTP
+The default port is 8912. This can be changed by setting the property `management.server.port`.
 
+The MBean `cern.c2mon:name=ClientConfigurationShell,type=Config` offers the `getTagsForURI` and `deleteTagForURI`, which correspond to `get-tags` and `delete-tag` respectively.
 
-Look around: endpoints and methods
+An easy way to remotely interact with the Shell is through HTTP. A Tag can conveniently be created or deleted with the following GET requests:
 
-calling a method
+* Create a Tag: `http://<HOST-IP>:<HOST-PORT>/actuator/jolokia/exec/cern.c2mon:name=ClientConfigurationShell,type=Config/getTagsForURI/<URI>` 
+* Delete a Tag: `http://<HOST-IP>:<HOST-PORT>/actuator/jolokia/exec/cern.c2mon:name=ClientConfigurationShell,type=Config/deleteTagForURI/<URI>`
+
+Please efer to the [Jolokia documentation](https://jolokia.org/reference/html/protocol.html) for more information about the protocol and constructing requests.
