@@ -38,10 +38,14 @@
       - text: Class/Device/Property
   - text: User Guide
     subitems:
+      - text: Acquiring Data
+        # subitems:
+          #- text: Using OPC UA
       - text: Client API
         subitems:
           - text: Data Subscription
           - text: Configuration API
+          - text: Client Configuration Shell
           - text: Accessing Historical Data
       - text: Server
         subitems:

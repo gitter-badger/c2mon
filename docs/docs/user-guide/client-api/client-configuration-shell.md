@@ -1,10 +1,10 @@
 ---
 layout:   post
-title:    C2MON Client Configuration Shell
-summary:  Learn how to configure C2MON using the C2MON Client Configuration Shell
+title:    Client Configuration Shell
+summary:  Learn how to configure C2MON using the Client Configuration Shell
 ---
  
-Reconfiguration to a C2MON server instance can requested at runtime using the dedicated C2MON  Client Configuration Shell. 
+Reconfiguration to a C2MON server instance can be requested at runtime using the dedicated  Client Configuration Shell. 
 The interactive shell offers the following methods:
 
 * `get-tags <URI>` searches for a DataTag corresponding to the given URI within the existing C2MON configuration based on the Tag name. 
@@ -86,13 +86,13 @@ c2mon:
                 uriPattern: ^opc.tcp.*
 ```
 
-# Remote interaction
+# Remote interaction through JMX and HTTP
 
-## SSH
+<!---- ## SSH  ## JMX and HTTP---->
 
-## JMX and HTTP
 
-The functions of the C2MON Client Configuration Shell are also exposed through JMX and HTTP using Jolokia(https://jolokia.org/) as MBean operations.
+
+The functions of the C2MON Client Configuration Shell are exposed through JMX and HTTP using [Jolokia](https://jolokia.org/) as MBean operations.
 
 Once the shell starts, the available endpoints can be inspected and accessed under the following locators:
 
@@ -108,4 +108,4 @@ An easy way to remotely interact with the Shell is through HTTP. A Tag can conve
 * Create a Tag: `http://<HOST-IP>:<HOST-PORT>/actuator/jolokia/exec/cern.c2mon:name=ClientConfigurationShell,type=Config/getTagsForURI/<URI>` 
 * Delete a Tag: `http://<HOST-IP>:<HOST-PORT>/actuator/jolokia/exec/cern.c2mon:name=ClientConfigurationShell,type=Config/deleteTagForURI/<URI>`
 
-Please efer to the [Jolokia documentation](https://jolokia.org/reference/html/protocol.html) for more information about the protocol and constructing requests.
+Please refer to the [Jolokia documentation](https://jolokia.org/reference/html/protocol.html) for more information about the protocol and constructing requests.

@@ -1,8 +1,20 @@
 ---
 layout:   post
-title:    Using OPC UA
-summary:  Lean to deploy your own C2MON data acquisition module for OPC UA servers.
+title:    Acquiring Data
+summary:  Learn how to setup C2MON to acquire data using OPC UA
 ---
+
+We have gotten to know the configuration of Tags, Equipments and Processes in the [overview]({{ site.baseurl }}{% link docs/overview/index.md %}).
+Let's take a look at how to go about applying these configurations to acquire data from running processes.
+
+C2MON as a modular relies on Data Acquisition Processes, or DAQs, to collect data from sources.
+These are independent Java processes which fetch their respective configuration from the server layer, and collect data according to their configured sources.
+DAQs can be implemented in vastly different ways to meet the requirements of the respective data sources or of user needs - you can easily implement your own solution by following the [DAQ module developer guide]({{ site.baseurl }}{% link docs/user-guide/daq-api/daq-module-testing-guide.md %}). 
+
+In this section we will walk-through the setup of a C2MON instance with sample configurations and and data sources.
+This walk-through provides a hand's on example by setting up the C2MON environment and goes into detail on how to monitor randomly generated data via a custom OPC UA server using the open source [OPC UA DAQ]({{ site.baseurl }}{% link docs/user-guide/acquiring-data/using-opc-ua.md %}).
+You should be familar with Docker and with basic C2MON terminology before starting this walk-through.
+
 
 # What is OPC UA?
 
