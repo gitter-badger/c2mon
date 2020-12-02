@@ -39,8 +39,8 @@
   - text: User Guide
     subitems:
       - text: Acquiring Data
-        # subitems:
-          #- text: Using OPC UA
+        subitems:
+          - text: Using OPC UA
       - text: Client API
         subitems:
           - text: Data Subscription
