@@ -1,6 +1,6 @@
 ---
 layout:   post
-title:    The OPC UA DAQ
+title:    OPC UA DAQ
 summary:  Provides an overview over the OPC UA DAQ
 ---
 
