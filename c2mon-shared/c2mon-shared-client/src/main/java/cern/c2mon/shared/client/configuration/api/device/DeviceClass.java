@@ -39,11 +39,13 @@ public class DeviceClass implements ConfigurationEntity {
     /**
      * names for properties that compose the Device Class
      */
+    @IgnoreProperty
     private List<String> properties = new ArrayList<>();
 
     /**
      * names for commands that compose the Device Class
      */
+    @IgnoreProperty
     private List<String> commands = new ArrayList<>();
 
 
