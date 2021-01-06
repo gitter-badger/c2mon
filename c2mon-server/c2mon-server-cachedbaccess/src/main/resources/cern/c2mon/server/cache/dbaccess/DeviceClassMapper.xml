@@ -11,7 +11,7 @@
       <arg column="device_class_description" javaType="String" />
     </constructor>
     <collection property="properties" ofType="cern.c2mon.shared.client.device.Property" javaType="java.util.ArrayList" resultMap="propertyResultMap" />
-    <collection property="commands" ofType="cern.c2mon.server.common.device.Command" javaType="java.util.ArrayList" resultMap="commandResultMap" />
+    <collection property="commands" ofType="cern.c2mon.shared.client.device.Command" javaType="java.util.ArrayList" resultMap="commandResultMap" />
     <collection property="deviceIds" ofType="Long" javaType="java.util.ArrayList" resultMap="deviceIdsResultMap" />
   </resultMap>
 
@@ -26,7 +26,7 @@
     </collection>
   </resultMap>
 
-  <resultMap id="commandResultMap" type="cern.c2mon.server.common.device.Command">
+  <resultMap id="commandResultMap" type="cern.c2mon.shared.client.device.Command">
     <id column="command_id" property="id" jdbcType="NUMERIC" javaType="java.lang.Long"/>
     <result column="command_name" property="name" />
     <result column="command_description" property="description" />

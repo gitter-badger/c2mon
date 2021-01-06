@@ -14,37 +14,54 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-package cern.c2mon.server.common.device;
+package cern.c2mon.shared.client.device;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
-
-import cern.c2mon.shared.client.device.DeviceCommand;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 
 /**
- * Simple XML mapper bean representing a list of device commands. Used when
- * deserialising device commands during configuration.
+ * Simple XML mapper bean representing a device class command. Used when
+ * deserialising device class commands during configuration.
  *
  * @author Justin Lewis Salmon
  */
-@Root(name = "DeviceCommands")
-public class DeviceCommandList {
+public class Command implements Serializable {
 
-  @ElementList(entry = "DeviceCommand", inline = true, required = false)
-  private List<DeviceCommand> deviceCommands = new ArrayList<>();
+  private static final long serialVersionUID = -6943334662697273304L;
 
-  public DeviceCommandList(List<DeviceCommand> deviceCommand) {
-    this.deviceCommands = deviceCommand;
+  @Attribute
+  private Long id;
+
+  @Attribute
+  private String name;
+
+  @Element(required = false)
+  private String description;
+
+  public Command(final Long id, final String name, final String description) {
+    this.id = id;
+    this.name = name;
+    this.description = description;
   }
 
-  public DeviceCommandList() {
-    super();
+  public Command() {
   }
 
-  public List<DeviceCommand> getDeviceCommands() {
-    return deviceCommands;
+  public String getName() {
+    return name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 }

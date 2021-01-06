@@ -14,54 +14,37 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-package cern.c2mon.server.common.device;
+package cern.c2mon.shared.client.device;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Root;
+
+import cern.c2mon.shared.client.device.DeviceProperty;
 
 /**
- * Simple XML mapper bean representing a device class command. Used when
- * deserialising device class commands during configuration.
+ * Simple XML mapper bean representing a list of device properties. Used when
+ * deserialising device properties during configuration.
  *
  * @author Justin Lewis Salmon
  */
-public class Command implements Serializable {
+@Root(name = "DeviceProperties")
+public class DevicePropertyList {
 
-  private static final long serialVersionUID = -6943334662697273304L;
+  @ElementList(entry = "DeviceProperty", inline = true, required = false)
+  private List<DeviceProperty> deviceProperties = new ArrayList<>();
 
-  @Attribute
-  private Long id;
-
-  @Attribute
-  private String name;
-
-  @Element(required = false)
-  private String description;
-
-  public Command(final Long id, final String name, final String description) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
+  public DevicePropertyList(List<DeviceProperty> deviceProperties) {
+    this.deviceProperties = deviceProperties;
   }
 
-  public Command() {
+  public DevicePropertyList() {
+    super();
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
+  public List<DeviceProperty> getDeviceProperties() {
+    return deviceProperties;
   }
 }

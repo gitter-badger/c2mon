@@ -18,6 +18,7 @@ package cern.c2mon.server.cache.device;
 
 import java.util.*;
 
+import cern.c2mon.shared.client.device.*;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
@@ -31,9 +32,6 @@ import cern.c2mon.server.cache.DeviceFacade;
 import cern.c2mon.server.cache.common.AbstractFacade;
 import cern.c2mon.server.cache.exception.CacheElementNotFoundException;
 import cern.c2mon.server.common.device.*;
-import cern.c2mon.shared.client.device.DeviceCommand;
-import cern.c2mon.shared.client.device.DeviceInfo;
-import cern.c2mon.shared.client.device.DeviceProperty;
 import cern.c2mon.shared.common.ConfigurationException;
 import cern.c2mon.shared.daq.config.Change;
 
