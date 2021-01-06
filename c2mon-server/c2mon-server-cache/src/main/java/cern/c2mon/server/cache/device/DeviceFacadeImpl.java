@@ -1,16 +1,16 @@
 /******************************************************************************
  * Copyright (C) 2010-2016 CERN. All rights not expressly granted are reserved.
- * 
+ *
  * This file is part of the CERN Control and Monitoring Platform 'C2MON'.
  * C2MON is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation, either version 3 of the license.
- * 
+ *
  * C2MON is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
@@ -181,85 +181,90 @@ public class DeviceFacadeImpl extends AbstractFacade<Device> implements DeviceFa
 
   @Override
   protected void validateConfig(Device cacheObject) {
+    try {
+      deviceCache.acquireReadLockOnKey(cacheObject.getId());
 
-    if (cacheObject.getId() == null) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"id\" cannot be null");
-    }
-    if (cacheObject.getName() == null) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"name\" cannot be null");
-    }
-    if (cacheObject.getName().length() == 0) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"name\" cannot be empty");
-    }
-    if (cacheObject.getDeviceClassId() == null) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceClassId\" cannot be null");
-    }
-    if (cacheObject.getDeviceProperties() == null) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceProperties\" cannot be null");
-    }
-    if (cacheObject.getDeviceCommands() == null) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceCommands\" cannot be null");
-    }
-
-    // Cross-check device class ID
-    DeviceClass deviceClass = deviceClassCache.get(cacheObject.getDeviceClassId());
-    if (deviceClass == null) {
-      throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceClassId\" must refer to an existing DeviceClass");
-    }
-
-    // Cross-check properties
-    for (DeviceProperty deviceProperty : cacheObject.getDeviceProperties()) {
-      if (!deviceClass.getPropertyNames().contains(deviceProperty.getName())) {
-        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName() + "\" (id: "
-            + deviceProperty.getId() + ") must refer to a property defined in parent class");
+      if (cacheObject.getId() == null) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"id\" cannot be null");
+      }
+      if (cacheObject.getName() == null) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"name\" cannot be null");
+      }
+      if (cacheObject.getName().length() == 0) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"name\" cannot be empty");
+      }
+      if (cacheObject.getDeviceClassId() == null) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceClassId\" cannot be null");
+      }
+      if (cacheObject.getDeviceProperties() == null) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceProperties\" cannot be null");
+      }
+      if (cacheObject.getDeviceCommands() == null) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceCommands\" cannot be null");
       }
 
-      if (!deviceClass.getPropertyIds().contains(deviceProperty.getId())) {
-        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName()
-            + "\" specifies incorrect ID (does not match corresponding parent class property)");
+      // Cross-check device class ID
+      DeviceClass deviceClass = deviceClassCache.get(cacheObject.getDeviceClassId());
+      if (deviceClass == null) {
+        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "Parameter \"deviceClassId\" must refer to an existing DeviceClass");
       }
 
-      // Cross-check fields
-      if (deviceProperty.getFields() != null) {
-        for (DeviceProperty field : deviceProperty.getFields().values()) {
+      // Cross-check properties
+      for (DeviceProperty deviceProperty : cacheObject.getDeviceProperties()) {
+        if (!deviceClass.getPropertyNames().contains(deviceProperty.getName())) {
+          throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName() + "\" (id: "
+              + deviceProperty.getId() + ") must refer to a property defined in parent class");
+        }
 
-          if (!deviceClass.getFieldNames(deviceProperty.getName()).contains(field.getName())) {
-            throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "PropertyField \"" + field.getName() + "\" (id: " + field.getId()
-                + ") must refer to a field defined in parent class property");
-          }
+        if (!deviceClass.getPropertyIds().contains(deviceProperty.getId())) {
+          throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName()
+              + "\" specifies incorrect ID (does not match corresponding parent class property)");
+        }
 
-          if (!deviceClass.getFieldIds(deviceProperty.getName()).contains(field.getId())) {
-            throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "PropertyField \"" + field.getName()
-                + "\" specifies incorrect ID (does not match corresponding parent property)");
+        // Cross-check fields
+        if (deviceProperty.getFields() != null) {
+          for (DeviceProperty field : deviceProperty.getFields().values()) {
+
+            if (!deviceClass.getFieldNames(deviceProperty.getName()).contains(field.getName())) {
+              throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "PropertyField \"" + field.getName() + "\" (id: " + field.getId()
+                  + ") must refer to a field defined in parent class property");
+            }
+
+            if (!deviceClass.getFieldIds(deviceProperty.getName()).contains(field.getId())) {
+              throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "PropertyField \"" + field.getName()
+                  + "\" specifies incorrect ID (does not match corresponding parent property)");
+            }
           }
+        }
+
+        // Sanity check on category
+        if (deviceProperty.getCategory() == null && deviceProperty.getFields() == null) {
+          throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName()
+              + "\" must specify a value category");
+        }
+
+        try {
+          deviceProperty.getResultTypeClass();
+        } catch (ClassNotFoundException e) {
+          throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName()
+              + "\" specifies invalid result type");
         }
       }
 
-      // Sanity check on category
-      if (deviceProperty.getCategory() == null && deviceProperty.getFields() == null) {
-        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName()
-            + "\" must specify a value category");
-      }
+      // Cross-check commands
+      for (DeviceCommand deviceCommand : cacheObject.getDeviceCommands()) {
+        if (!deviceClass.getCommandNames().contains(deviceCommand.getName())) {
+          throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceCommand \"" + deviceCommand.getName()
+                  + "\" must refer to a command defined in parent device class");
+        }
 
-      try {
-        deviceProperty.getResultTypeClass();
-      } catch (ClassNotFoundException e) {
-        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceProperty \"" + deviceProperty.getName()
-            + "\" specifies invalid result type");
+        if (!deviceClass.getCommandIds().contains(deviceCommand.getId())) {
+          throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceCommand \"" + deviceCommand.getName()
+                  + "\" specifies incorrect ID (does not match corresponding parent class command)");
+        }
       }
-    }
-
-    // Cross-check commands
-    for (DeviceCommand deviceCommand : cacheObject.getDeviceCommands()) {
-      if (!deviceClass.getCommandNames().contains(deviceCommand.getName())) {
-        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceCommand \"" + deviceCommand.getName()
-            + "\" must refer to a command defined in parent device class");
-      }
-
-      if (!deviceClass.getCommandIds().contains(deviceCommand.getId())) {
-        throw new ConfigurationException(ConfigurationException.INVALID_PARAMETER_VALUE, "DeviceCommand \"" + deviceCommand.getName()
-            + "\" specifies incorrect ID (does not match corresponding parent class command)");
-      }
+    } finally {
+      deviceCache.releaseReadLockOnKey(cacheObject.getId());
     }
   }
 
