@@ -14,54 +14,37 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-package cern.c2mon.shared.client.device;
+package cern.c2mon.server.common.device;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Root;
+
+import cern.c2mon.shared.client.device.DeviceCommand;
 
 /**
- * Simple XML mapper bean representing a device class command. Used when
- * deserialising device class commands during configuration.
+ * Simple XML mapper bean representing a list of device commands. Used when
+ * deserialising device commands during configuration.
  *
  * @author Justin Lewis Salmon
  */
-public class Command implements Serializable {
+@Root(name = "DeviceCommands")
+public class DeviceCommandList {
 
-  private static final long serialVersionUID = -6943334662697273304L;
+  @ElementList(entry = "DeviceCommand", inline = true, required = false)
+  private List<DeviceCommand> deviceCommands = new ArrayList<>();
 
-  @Attribute
-  private Long id;
-
-  @Attribute
-  private String name;
-
-  @Element(required = false)
-  private String description;
-
-  public Command(final Long id, final String name, final String description) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
+  public DeviceCommandList(List<DeviceCommand> deviceCommand) {
+    this.deviceCommands = deviceCommand;
   }
 
-  public Command() {
+  public DeviceCommandList() {
+    super();
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
+  public List<DeviceCommand> getDeviceCommands() {
+    return deviceCommands;
   }
 }

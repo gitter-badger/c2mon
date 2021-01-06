@@ -23,7 +23,6 @@ import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import cern.c2mon.shared.client.device.Command;
 import cern.c2mon.shared.client.device.Property;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;

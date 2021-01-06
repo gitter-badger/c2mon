@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with C2MON. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-package cern.c2mon.shared.client.device;
+package cern.c2mon.server.common.device;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -83,9 +83,9 @@ public class DeviceClassConfigurationManagerTest {
 
     @Test
     public void createDeviceClassWithPropertyShouldReturnProperty() {
-        Property prop = new Property("name", "description");
+        Property p = new Property("name", "description");
         DeviceClass expected = new DeviceClass.CreateBuilder(String.valueOf(System.currentTimeMillis()))
-                .addProperty(prop)
+                .addProperty(p)
                 .build();
         Capture<Configuration> c = newCapture();
         expect(configurationRequestSenderMock.applyConfiguration(and(capture(c), isA(Configuration.class)), anyObject()))
@@ -95,7 +95,7 @@ public class DeviceClassConfigurationManagerTest {
 
         configurationService.createDeviceClass(expected);
         DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
-        assertTrue(entity.getProperties().getProperties().contains(prop));
+        assertTrue(entity.getProperties().getProperties().contains(p));
     }
 
     @Test
