@@ -5,6 +5,7 @@ import cern.c2mon.client.core.configuration.DeviceClassConfigurationManager;
 import cern.c2mon.shared.client.configuration.ConfigurationReport;
 import cern.c2mon.shared.client.configuration.api.Configuration;
 import cern.c2mon.shared.client.configuration.api.device.DeviceClass;
+import cern.c2mon.shared.client.device.Command;
 import cern.c2mon.shared.client.device.Property;
 import org.easymock.Capture;
 import org.junit.Before;
@@ -127,6 +128,42 @@ public class DeviceClassConfigurationManagerTest {
         configurationService.createDeviceClass(expected);
         DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
         assertTrue(entity.getProperties().getProperties().containsAll(Arrays.asList(p1, p2, p3)));
+    }
+
+    @Test
+    public void createDeviceClassWithCommandShouldReturnCommand() {
+        Command cmd = new Command("name", "description");
+        DeviceClass expected = new DeviceClass.CreateBuilder(String.valueOf(System.currentTimeMillis()))
+                .addCommand(cmd)
+                .build();
+        Capture<Configuration> c = newCapture();
+        expect(configurationRequestSenderMock.applyConfiguration(and(capture(c), isA(Configuration.class)), anyObject()))
+                .andReturn(new ConfigurationReport())
+                .once();
+        replay(configurationRequestSenderMock);
+
+        configurationService.createDeviceClass(expected);
+        DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
+        assertTrue(entity.getCommands().getCommands().contains(cmd));
+    }
+
+    @Test
+    public void createDeviceClassWithMultipleCommandsShouldReturnCommands() {
+        Command p1 = new Command("name1", "description");
+        Command p2 = new Command("name2", "description");
+        Command p3 = new Command("name3", "description");
+        DeviceClass expected = new DeviceClass.CreateBuilder(String.valueOf(System.currentTimeMillis()))
+                .addCommand(p1, p2, p3)
+                .build();
+        Capture<Configuration> c = newCapture();
+        expect(configurationRequestSenderMock.applyConfiguration(and(capture(c), isA(Configuration.class)), anyObject()))
+                .andReturn(new ConfigurationReport())
+                .once();
+        replay(configurationRequestSenderMock);
+
+        configurationService.createDeviceClass(expected);
+        DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
+        assertTrue(entity.getCommands().getCommands().containsAll(Arrays.asList(p1, p2, p3)));
     }
 
     @Test
