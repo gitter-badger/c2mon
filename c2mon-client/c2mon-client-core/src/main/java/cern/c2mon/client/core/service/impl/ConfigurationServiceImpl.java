@@ -20,7 +20,6 @@ import java.util.*;
 
 import javax.jms.JMSException;
 
-import cern.c2mon.shared.client.configuration.api.device.Device;
 import cern.c2mon.shared.client.configuration.api.device.DeviceClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +70,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
   private DeviceClassConfigurationManager deviceClassConfigurationManager;
 
-  private DeviceConfigurationManager deviceConfigurationManager;
-
   @Autowired
   protected ConfigurationServiceImpl(final @Qualifier("coreRequestHandler") RequestHandler requestHandler,
                                      final ConfigurationRequestSender configurationRequestSender,
@@ -84,11 +81,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                                      RuleTagConfigurationManager ruleTagConfigurationManager,
                                      AlarmConfigurationManager alarmConfigurationManager,
                                      ControlTagConfigurationManager controlTagConfigurationManager,
-                                     CommandTagConfigurationManager commandTagConfigurationManager,
-                                     DeviceConfigurationManager deviceConfigurationManager) {
+                                     CommandTagConfigurationManager commandTagConfigurationManager) {
     this.clientRequestHandler = requestHandler;
     this.configurationRequestSender = configurationRequestSender;
     this.processConfigurationManager = processConfigurationManager;
+    this.deviceClassConfigurationManager = deviceClassConfigurationManager;
     this.equipmentConfigurationManager = equipmentConfigurationManager;
     this.subEquipmentConfigurationManager = subEquipmentConfigurationManager;
     this.dataTagConfigurationManager = dataTagConfigurationManager;
@@ -96,8 +93,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     this.alarmConfigurationManager = alarmConfigurationManager;
     this.controlTagConfigurationManager = controlTagConfigurationManager;
     this.commandTagConfigurationManager = commandTagConfigurationManager;
-    this.deviceClassConfigurationManager = deviceClassConfigurationManager;
-    this.deviceConfigurationManager = deviceConfigurationManager;
   }
 
   @Override
@@ -518,31 +513,4 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   public ConfigurationReport removeDeviceClass(String name) {
     return deviceClassConfigurationManager.removeDeviceClass(name);
   }
-
-  @Override
-  public ConfigurationReport createDevice(String deviceName, String deviceClassName) {
-    return deviceConfigurationManager.createDevice(deviceName, deviceClassName);
-  }
-
-  @Override
-  public ConfigurationReport createDevice(String deviceName, long deviceClassId) {
-    return deviceConfigurationManager.createDevice(deviceName, deviceClassId);
-  }
-
-  @Override
-  public ConfigurationReport createDevice(Device device) {
-    return deviceConfigurationManager.createDevice(device);
-  }
-
-  @Override
-  public ConfigurationReport removeDeviceById(Long id) {
-    return deviceConfigurationManager.removeDeviceById(id);
-  }
-
-  @Override
-  public ConfigurationReport removeDevice(String name) {
-    return deviceConfigurationManager.removeDevice(name);
-  }
-
 }
-
