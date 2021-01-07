@@ -171,7 +171,7 @@
     SELECT PROPID
     FROM   PROPERTY
     WHERE  PROPDEVCLASSID = #{device_class_id}
-    AND    PROPNAME = #{property_ name}
+    AND    PROPNAME = #{property_name}
   </select>
 
   <select id="getCommandIdByCommandNameAndDevClassId" resultType="Long">
