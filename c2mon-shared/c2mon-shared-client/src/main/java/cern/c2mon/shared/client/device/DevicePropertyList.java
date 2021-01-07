@@ -42,14 +42,6 @@ public class DevicePropertyList {
     this.deviceProperties = deviceProperties;
   }
 
-  /**
-   * Needed to instantiate some the application context for the cache persistence tests
-   * @param deviceProperties the device properties to wrap in a DevicePropertyList
-   */
-  public DevicePropertyList(List<DeviceProperty> deviceProperties) {
-    this.deviceProperties = new HashSet<>(deviceProperties);
-  }
-
   public DevicePropertyList() {
     super();
   }
