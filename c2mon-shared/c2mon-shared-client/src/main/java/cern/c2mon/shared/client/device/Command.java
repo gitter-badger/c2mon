@@ -48,6 +48,17 @@ public class Command implements Serializable {
 
   public Command() {
   }
+  /**
+   * Constructor to use during command creation requests.
+   *
+   * @param name the name of the command
+   * @param description the command description
+   */
+
+  public Command(final String name, final String description) {
+    this.name = name;
+    this.description = description;
+  }
 
   public String getName() {
     return name;
