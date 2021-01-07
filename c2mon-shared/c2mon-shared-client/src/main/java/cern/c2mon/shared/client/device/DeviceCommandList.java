@@ -42,6 +42,10 @@ public class DeviceCommandList {
     this.deviceCommands = deviceCommands;
   }
 
+  /**
+   * Needed to instantiate some the application context for the cache persistence tests
+   * @param deviceCommands the device commands to wrap in a DeviceCommandList
+   */
   public DeviceCommandList(List<DeviceCommand> deviceCommands) {
     this.deviceCommands = new HashSet<>(deviceCommands);
   }
