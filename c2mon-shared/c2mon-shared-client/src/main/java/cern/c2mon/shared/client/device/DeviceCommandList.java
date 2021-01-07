@@ -38,8 +38,12 @@ public class DeviceCommandList {
   @ElementList(entry = "DeviceCommand", inline = true, required = false)
   private Set<DeviceCommand> deviceCommands = new HashSet<>();
 
-  public DeviceCommandList(Set<DeviceCommand> deviceCommand) {
-    this.deviceCommands = deviceCommand;
+  public DeviceCommandList(Set<DeviceCommand> deviceCommands) {
+    this.deviceCommands = deviceCommands;
+  }
+
+  public DeviceCommandList(List<DeviceCommand> deviceCommands) {
+    this.deviceCommands = new HashSet<>(deviceCommands);
   }
 
   public DeviceCommandList() {

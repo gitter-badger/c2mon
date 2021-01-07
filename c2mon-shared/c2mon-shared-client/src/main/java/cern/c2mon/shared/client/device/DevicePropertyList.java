@@ -42,6 +42,10 @@ public class DevicePropertyList {
     this.deviceProperties = deviceProperties;
   }
 
+  public DevicePropertyList(List<DeviceProperty> deviceProperties) {
+    this.deviceProperties = new HashSet<>(deviceProperties);
+  }
+
   public DevicePropertyList() {
     super();
   }
