@@ -505,11 +505,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   }
 
   @Override
-  public ConfigurationReport updateDeviceClass(DeviceClass deviceClass) {
-    return deviceClassConfigurationManager.updateDeviceClass(deviceClass);
-  }
-
-  @Override
   public ConfigurationReport removeDeviceClassById(Long id) {
     return deviceClassConfigurationManager.removeDeviceClassById(id);
   }

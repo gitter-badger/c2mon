@@ -60,20 +60,6 @@ public class DeviceClassConfigurationManagerImpl implements DeviceClassConfigura
   }
 
   @Override
-  public ConfigurationReport updateDeviceClass(DeviceClass deviceClass) {
-
-    List<DeviceClass> deviceClasses = new ArrayList<>();
-    deviceClasses.add(deviceClass);
-
-    validateIsUpdate(deviceClasses);
-
-    Configuration config = new Configuration();
-    config.setEntities(deviceClasses);
-
-    return configurationRequestSender.applyConfiguration(config, null);
-  }
-
-  @Override
   public ConfigurationReport removeDeviceClassById(Long id) {
 
     DeviceClass deleteDeviceClass = new DeviceClass();
