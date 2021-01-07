@@ -25,6 +25,18 @@ public class DeviceClassConfigurationManagerTest {
     public void setupServer() {
         reset(configurationRequestSenderMock);
     }
+    @Test
+    public void createDeviceClassByNameShouldSendCreateRequest() {
+        Capture<Configuration> c = newCapture();
+        expect(configurationRequestSenderMock.applyConfiguration(and(capture(c), isA(Configuration.class)), anyObject()))
+                .andReturn(new ConfigurationReport())
+                .once();
+        replay(configurationRequestSenderMock);
+
+        configurationService.createDeviceClass("devClassName");
+
+        assertTrue(c.getValue().getEntities().get(0).isCreated());
+    }
 
     @Test
     public void createDeviceClassByNameShouldCreateDeviceClassObject() {
@@ -116,4 +128,30 @@ public class DeviceClassConfigurationManagerTest {
         DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
         assertTrue(entity.getProperties().getProperties().containsAll(Arrays.asList(p1, p2, p3)));
     }
+
+    @Test
+    public void deleteDeviceClassShouldSendDeleteRequest() {
+        Capture<Configuration> c = newCapture();
+        expect(configurationRequestSenderMock.applyConfiguration(and(capture(c), isA(Configuration.class)), anyObject()))
+                .andReturn(new ConfigurationReport())
+                .once();
+        replay(configurationRequestSenderMock);
+        configurationService.removeDeviceClass("class");
+        DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
+        assertTrue(entity.isDeleted());
+    }
+
+    @Test
+    public void deleteDeviceClassByIdShouldSendDeleteRequest() {
+        Capture<Configuration> c = newCapture();
+        expect(configurationRequestSenderMock.applyConfiguration(and(capture(c), isA(Configuration.class)), anyObject()))
+                .andReturn(new ConfigurationReport())
+                .once();
+        replay(configurationRequestSenderMock);
+
+        configurationService.removeDeviceClassById(444L);
+        DeviceClass entity = (DeviceClass) c.getValue().getEntities().get(0);
+        assertTrue(entity.isDeleted());
+    }
+
 }

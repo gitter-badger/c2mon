@@ -100,4 +100,35 @@ public class ConfigurationServiceDeviceClassTest {
         Assert.assertEquals(ConfigConstants.Status.OK, report.getStatus());
     }
 
+    @Test
+    @Ignore
+    @DirtiesContext
+    public void testRemoveDeviceClassByName() {
+        String tmpName = "testRemoveDeviceClass";
+        DeviceClass deviceClass = new DeviceClass.CreateBuilder(tmpName)
+                .addCommand("removeCommand", "description")
+                .addProperty("removeProperty", "description")
+                .build();
+        configurationService.createDeviceClass(deviceClass);
+
+        ConfigurationReport report = configurationService.removeDeviceClass(tmpName);
+        Assert.assertEquals(ConfigConstants.Status.OK, report.getStatus());
+    }
+
+
+    @Test
+    @Ignore
+    @DirtiesContext
+    public void testRemoveDeviceClassById() {
+        DeviceClass deviceClass = new DeviceClass.CreateBuilder("testRemoveDeviceClass")
+                .id(444L)
+                .addCommand("removeCommand", "description")
+                .addProperty("removeProperty", "description")
+                .build();
+        configurationService.createDeviceClass(deviceClass);
+
+        ConfigurationReport report = configurationService.removeDeviceClassById(444L);
+        Assert.assertEquals(ConfigConstants.Status.OK, report.getStatus());
+    }
+
 }
