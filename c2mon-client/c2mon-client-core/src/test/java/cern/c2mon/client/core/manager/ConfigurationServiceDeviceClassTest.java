@@ -89,4 +89,15 @@ public class ConfigurationServiceDeviceClassTest {
         ConfigurationReport report = configurationService.createDeviceClass(deviceClass);
         Assert.assertEquals(ConfigConstants.Status.OK, report.getStatus());
     }
+    @Test
+    @Ignore
+    @DirtiesContext
+    public void testCreateDeviceClassByDeviceClassWithCommands() {
+        DeviceClass deviceClass = new DeviceClass.CreateBuilder(String.valueOf(System.currentTimeMillis()))
+                .addCommand("testcmd", "testcmddesc")
+                .build();
+        ConfigurationReport report = configurationService.createDeviceClass(deviceClass);
+        Assert.assertEquals(ConfigConstants.Status.OK, report.getStatus());
+    }
+
 }
